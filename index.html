@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Random Dance Play</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpath fill='%23e58aad' d='M50 84 C18 60 4 44 4 27 C4 14 14 6 26 6 C36 6 44 12 50 21 C56 12 64 6 74 6 C86 6 96 14 96 27 C96 44 82 60 50 84 Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1227,37 +1228,42 @@ document.addEventListener('keydown', e => {
   document.getElementById('marquee-track').innerHTML = half + half;
 })();
 
-/* photocards around the hero. these only appear if you add real photos to the /photos
-   folder (nayeon.jpg, momo.jpg, sana.jpg, chaewon.jpg, wonhee.jpg, iroha.jpg). no names,
-   no fallbacks: a missing photo just shows nothing, so the hero stays clean by default. */
-const PHOTOCARDS = [
-  { id: 'nayeon',  pos: 'left:-10px;  top:2px;   --r:-8deg' },
-  { id: 'sana',    pos: 'left:14px;   top:150px; --r:6deg'  },
-  { id: 'wonhee',  pos: 'left:-4px;   top:246px; --r:-5deg' },
-  { id: 'momo',    pos: 'right:-10px; top:14px;  --r:7deg'  },
-  { id: 'chaewon', pos: 'right:12px;  top:158px; --r:-6deg' },
-  { id: 'iroha',   pos: 'right:-4px;  top:252px; --r:5deg'  },
-];
-function buildPhotocards() {
+/* photocards around the hero. these are opt-in: drop portrait photos into /photos
+   (nayeon.jpg, momo.jpg, sana.jpg, chaewon.jpg, wonhee.jpg, iroha.jpg) and list which
+   ones you added in photos/manifest.json, e.g. ["nayeon","momo"]. no names, no ugly
+   fallbacks: an empty manifest means the hero just stays clean. reading a manifest
+   instead of blindly probing each file keeps the console free of 404s. */
+const PHOTOCARDS = {
+  nayeon:  'left:-10px;  top:2px;   --r:-8deg',
+  sana:    'left:14px;   top:150px; --r:6deg',
+  wonhee:  'left:-4px;   top:246px; --r:-5deg',
+  momo:    'right:-10px; top:14px;  --r:7deg',
+  chaewon: 'right:12px;  top:158px; --r:-6deg',
+  iroha:   'right:-4px;  top:252px; --r:5deg',
+};
+async function buildPhotocards() {
   const wrap = document.getElementById('pcards');
   if (!wrap) return;
   wrap.innerHTML = '';
+  let list = [];
+  try {
+    const r = await fetch('photos/manifest.json', { cache: 'no-store' });
+    if (r.ok) list = await r.json();
+  } catch { /* no manifest, no cards */ }
+  if (!Array.isArray(list) || list.length === 0) return;
   const hero = document.querySelector('.hero');
-  for (const p of PHOTOCARDS) {
-    const src = 'photos/' + p.id + '.jpg';
-    const probe = new Image();
-    probe.onload = () => {
-      const c = document.createElement('div');
-      c.className = 'pcard';
-      c.setAttribute('style', p.pos);
-      c.innerHTML =
-        '<img class="ph" alt="" src="' + src + '">' +
-        '<span class="sheen"></span>' +
-        '<svg class="ico heart"><use href="#i-heart"/></svg>';
-      wrap.appendChild(c);
-      if (hero) hero.classList.add('has-cards');
-    };
-    probe.src = src;
+  for (const id of list) {
+    const pos = PHOTOCARDS[id];
+    if (!pos) continue;
+    const c = document.createElement('div');
+    c.className = 'pcard';
+    c.setAttribute('style', pos);
+    c.innerHTML =
+      '<img class="ph" alt="" src="photos/' + id + '.jpg">' +
+      '<span class="sheen"></span>' +
+      '<svg class="ico heart"><use href="#i-heart"/></svg>';
+    wrap.appendChild(c);
+    if (hero) hero.classList.add('has-cards');
   }
 }
 
@@ -1265,28 +1271,28 @@ function buildPhotocards() {
 /* Every id is a verified live official upload. startSec/endSec are approximate
    dance-section defaults; open Set clip on any song to fine-tune. */
 const CATALOG = [
-  { name: 'TWICE - Fancy',                group: 'TWICE',       youtubeId: 'kOHB85vDuow', startSec: 45, endSec: 75 },
-  { name: 'TWICE - TT',                   group: 'TWICE',       youtubeId: 'ePpPVE-GGJw', startSec: 45, endSec: 75 },
-  { name: 'TWICE - The Feels',            group: 'TWICE',       youtubeId: 'f5_wn8mexmM', startSec: 45, endSec: 75 },
-  { name: 'TWICE - Set Me Free',          group: 'TWICE',       youtubeId: 'w4cTYnOPdNk', startSec: 45, endSec: 75 },
-  { name: 'ILLIT - Magnetic',             group: 'ILLIT',       youtubeId: 'Vk5-c_v4gMU', startSec: 45, endSec: 75 },
-  { name: 'ILLIT - Cherish (My Love)',    group: 'ILLIT',       youtubeId: 'tbDGl7jEazA', startSec: 45, endSec: 75 },
-  { name: 'LE SSERAFIM - Antifragile',    group: 'LE SSERAFIM', youtubeId: 'pyf8cbqyfPs', startSec: 45, endSec: 75 },
-  { name: 'LE SSERAFIM - Perfect Night',  group: 'LE SSERAFIM', youtubeId: 'hLvWy2b857I', startSec: 45, endSec: 75 },
-  { name: 'LE SSERAFIM - EASY',           group: 'LE SSERAFIM', youtubeId: 'bNKXxwOQYB8', startSec: 45, endSec: 75 },
-  { name: 'NewJeans - Super Shy',         group: 'NewJeans',    youtubeId: 'ArmDp-zijuc', startSec: 45, endSec: 75 },
-  { name: 'NewJeans - OMG',               group: 'NewJeans',    youtubeId: 'sVTy_wmn5SU', startSec: 45, endSec: 75 },
-  { name: 'NewJeans - Hype Boy',          group: 'NewJeans',    youtubeId: '11cta61wi0g', startSec: 45, endSec: 75 },
-  { name: 'aespa - Supernova',            group: 'aespa',       youtubeId: 'phuiiNCxRMg', startSec: 45, endSec: 75 },
-  { name: 'aespa - Next Level',           group: 'aespa',       youtubeId: '4TWR90KJl84', startSec: 45, endSec: 75 },
-  { name: 'aespa - Whiplash',             group: 'aespa',       youtubeId: 'jWQx2f-CErU', startSec: 45, endSec: 75 },
-  { name: 'IVE - I AM',                   group: 'IVE',         youtubeId: '6ZUIwj3FgUY', startSec: 45, endSec: 75 },
-  { name: 'IVE - LOVE DIVE',              group: 'IVE',         youtubeId: 'Y8JFxS1HlDo', startSec: 45, endSec: 75 },
-  { name: 'IVE - After Like',             group: 'IVE',         youtubeId: 'F0B7HDiY-10', startSec: 45, endSec: 75 },
-  { name: '(G)I-DLE - Queencard',         group: '(G)I-DLE',    youtubeId: '7HDeem-JaSY', startSec: 45, endSec: 75 },
-  { name: 'ITZY - DALLA DALLA',           group: 'ITZY',        youtubeId: 'pNfTK39k55U', startSec: 45, endSec: 75 },
-  { name: 'NMIXX - Love Me Like This',    group: 'NMIXX',       youtubeId: 'EDnwWcFpObo', startSec: 45, endSec: 75 },
-  { name: 'BLACKPINK - Pink Venom',       group: 'BLACKPINK',   youtubeId: 'gQlMMD8auMs', startSec: 45, endSec: 75 },
+  { name: 'TWICE - Fancy',                group: 'TWICE',       youtubeId: 'kOHB85vDuow', startSec: 55, endSec: 83 },
+  { name: 'TWICE - TT',                   group: 'TWICE',       youtubeId: 'ePpPVE-GGJw', startSec: 58, endSec: 86 },
+  { name: 'TWICE - The Feels',            group: 'TWICE',       youtubeId: 'f5_wn8mexmM', startSec: 48, endSec: 76 },
+  { name: 'TWICE - Set Me Free',          group: 'TWICE',       youtubeId: 'w4cTYnOPdNk', startSec: 60, endSec: 88 },
+  { name: 'ILLIT - Magnetic',             group: 'ILLIT',       youtubeId: 'Vk5-c_v4gMU', startSec: 38, endSec: 66 },
+  { name: 'ILLIT - Cherish (My Love)',    group: 'ILLIT',       youtubeId: 'tbDGl7jEazA', startSec: 42, endSec: 70 },
+  { name: 'LE SSERAFIM - Antifragile',    group: 'LE SSERAFIM', youtubeId: 'pyf8cbqyfPs', startSec: 55, endSec: 83 },
+  { name: 'LE SSERAFIM - Perfect Night',  group: 'LE SSERAFIM', youtubeId: 'hLvWy2b857I', startSec: 46, endSec: 74 },
+  { name: 'LE SSERAFIM - EASY',           group: 'LE SSERAFIM', youtubeId: 'bNKXxwOQYB8', startSec: 48, endSec: 76 },
+  { name: 'NewJeans - Super Shy',         group: 'NewJeans',    youtubeId: 'ArmDp-zijuc', startSec: 26, endSec: 54 },
+  { name: 'NewJeans - OMG',               group: 'NewJeans',    youtubeId: 'sVTy_wmn5SU', startSec: 58, endSec: 86 },
+  { name: 'NewJeans - Hype Boy',          group: 'NewJeans',    youtubeId: '11cta61wi0g', startSec: 40, endSec: 68 },
+  { name: 'aespa - Supernova',            group: 'aespa',       youtubeId: 'phuiiNCxRMg', startSec: 12, endSec: 40 },
+  { name: 'aespa - Next Level',           group: 'aespa',       youtubeId: '4TWR90KJl84', startSec: 55, endSec: 83 },
+  { name: 'aespa - Whiplash',             group: 'aespa',       youtubeId: 'jWQx2f-CErU', startSec: 35, endSec: 63 },
+  { name: 'IVE - I AM',                   group: 'IVE',         youtubeId: '6ZUIwj3FgUY', startSec: 55, endSec: 83 },
+  { name: 'IVE - LOVE DIVE',              group: 'IVE',         youtubeId: 'Y8JFxS1HlDo', startSec: 48, endSec: 76 },
+  { name: 'IVE - After Like',             group: 'IVE',         youtubeId: 'F0B7HDiY-10', startSec: 55, endSec: 83 },
+  { name: '(G)I-DLE - Queencard',         group: '(G)I-DLE',    youtubeId: '7HDeem-JaSY', startSec: 43, endSec: 71 },
+  { name: 'ITZY - DALLA DALLA',           group: 'ITZY',        youtubeId: 'pNfTK39k55U', startSec: 58, endSec: 86 },
+  { name: 'NMIXX - Love Me Like This',    group: 'NMIXX',       youtubeId: 'EDnwWcFpObo', startSec: 50, endSec: 78 },
+  { name: 'BLACKPINK - Pink Venom',       group: 'BLACKPINK',   youtubeId: 'gQlMMD8auMs', startSec: 45, endSec: 73 },
 ];
 
 const PLAYLISTS = [

@@ -7,3 +7,4 @@
 # personal bias photos stay local, never commit copyrighted images
 photos/*
 !photos/README.txt
+!photos/manifest.json
