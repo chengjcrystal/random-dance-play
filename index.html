@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpath fill='%23e58aad' d='M50 84 C18 60 4 44 4 27 C4 14 14 6 26 6 C36 6 44 12 50 21 C56 12 64 6 74 6 C86 6 96 14 96 27 C96 44 82 60 50 84 Z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --cream: #f3e6ea;
@@ -16,8 +16,8 @@
     --blush-soft: #f6e2e9;
     --rose: #d4658c;
     --rose-deep: #a53f65;
-    --red: #ce1236;
-    --red-dark: #9c0b28;
+    --red: #c11132;
+    --red-dark: #900d22;
     --ink: #2f131c;
     --muted: #855968;
     --wine: #160a0f;
@@ -38,8 +38,8 @@
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     background:
-      radial-gradient(130% 74% at 50% -14%, #ffb0cb 0%, transparent 54%),
-      linear-gradient(#ecd6de, #ddbecb);
+      radial-gradient(130% 74% at 50% -12%, #ffcfe1 0%, transparent 55%),
+      linear-gradient(#fce3ec, #f7d1df);
     background-attachment: fixed;
   }
   h1, h2, h3 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; }
@@ -93,9 +93,10 @@
   @media (min-width: 1001px) { .hero.has-cards { min-height: 372px; } }
   .hero .kicker { font-family: Fraunces, serif; font-style: italic; color: var(--rose-deep); font-size: 15px; margin-bottom: 10px; }
   .hero .kicker .ico { color: var(--rose); font-size: 20px; margin: 0 6px; }
-  .wordmark { font-family: Fraunces, serif; font-weight: 700; line-height: .94; letter-spacing: -.02em;
-    font-size: clamp(42px, 9.4vw, 100px); color: var(--ink); }
-  .wordmark em { font-style: italic; color: var(--red); font-weight: 600; }
+  .wordmark { font-family: 'Bagel Fat One', system-ui, cursive; font-weight: 400; line-height: 1.02; letter-spacing: .005em;
+    font-size: clamp(36px, 7.8vw, 78px); color: var(--red); text-shadow: 3px 4px 0 rgba(144,13,34,.16); }
+  .wordmark em { font-style: normal; color: var(--blush-soft);
+    -webkit-text-stroke: 2.6px var(--red); paint-order: stroke fill; text-shadow: none; }
   .hero .gloss { width: clamp(46px, 9vw, 78px); vertical-align: -.14em; margin-left: 8px; filter: drop-shadow(0 6px 10px rgba(192,31,60,.22)); }
   .hero .tagline { font-family: Fraunces, serif; font-style: italic; color: var(--muted); font-size: clamp(14px, 2.6vw, 18px); margin-top: 12px; }
   .hero .spark { position: absolute; color: var(--gold); opacity: .9; }
@@ -104,12 +105,18 @@
   .hero .spark.c { bottom: 6px; left: 30%; font-size: 15px; color: var(--rose); }
   @media (max-width: 620px){ .hero .spark { display: none; } }
 
-  /* bold rule-and-star divider */
-  .divider { display: flex; align-items: center; justify-content: center; gap: 16px;
-    max-width: 360px; margin: 14px auto 30px; }
-  .divider .rule { flex: 1; height: 3px; background: linear-gradient(var(--chrome-mid), var(--chrome-deep));
-    box-shadow: 0 1px 0 rgba(255,255,255,.6); }
-  .divider .st { font-size: 21px; color: var(--red); }
+  /* cherry-red double-rule banner frame */
+  .hero .rules { position: relative; z-index: 1; height: 8px;
+    border-top: 2.6px solid var(--red); border-bottom: 2.6px solid var(--red); }
+  .hero .rules.top { margin: 0 0 22px; }
+  .hero .rules.bot { margin: 22px 0 0; }
+  /* cherries flanking the banner */
+  .hero .cherry { position: absolute; z-index: 1; color: var(--red);
+    width: clamp(44px, 7vw, 78px); height: auto;
+    filter: drop-shadow(2px 3px 0 rgba(144,13,34,.16)); }
+  .hero .cherry.l { left: 2%; top: 12px; transform: rotate(-12deg); }
+  .hero .cherry.r { right: 2%; top: 12px; transform: rotate(13deg); }
+  @media (max-width: 760px) { .hero .cherry { display: none; } }
 
   .settings-fab { position: fixed; top: 16px; right: 16px; z-index: 20; display: inline-flex; align-items: center; gap: 6px; }
   .settings-fab .ico { font-size: 15px; color: var(--rose-deep); }
@@ -385,6 +392,17 @@
       <rect x="48.4" y="28" width="3.2" height="46" rx="1.6"/>
     </g>
   </symbol>
+  <symbol id="i-cherry" viewBox="0 0 100 100">
+    <g fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round">
+      <path d="M33 60 C34 40 50 26 72 19"/>
+      <path d="M67 64 C61 44 64 31 76 19"/>
+    </g>
+    <path fill="currentColor" d="M72 19 C80 6 96 8 95 20 C94 31 80 32 72 19 Z"/>
+    <circle cx="31" cy="73" r="19" fill="currentColor"/>
+    <circle cx="68" cy="77" r="17" fill="currentColor"/>
+    <circle cx="25" cy="67" r="5" fill="#ffffff" opacity=".55"/>
+    <circle cx="62" cy="71" r="4.5" fill="#ffffff" opacity=".55"/>
+  </symbol>
 </defs></svg>
 
 <!-- glossy chrome heart (hero mascot) -->
@@ -421,11 +439,14 @@
       <svg class="ico spark b"><use href="#i-spark"/></svg>
       <svg class="ico fly f1"><use href="#i-fly"/></svg>
       <svg class="ico fly f2"><use href="#i-fly"/></svg>
+      <svg class="ico cherry l"><use href="#i-cherry"/></svg>
+      <svg class="ico cherry r"><use href="#i-cherry"/></svg>
+      <div class="rules top"></div>
       <div class="kicker">a random dance play</div>
       <h1 class="wordmark">Random <em>Dance</em> Play</h1>
       <div class="tagline">pick your songs, hit play, guess the song, dance</div>
+      <div class="rules bot"></div>
     </div>
-    <div class="divider"><span class="rule"></span><svg class="ico st"><use href="#i-star"/></svg><span class="rule"></span></div>
 
     <div class="win cat">
       <div class="titlebar"><span class="tb-title">browse_catalog.exe<svg class="ico" style="font-size:12px;margin-left:5px"><use href="#i-star"/></svg></span><span class="tb-ctrls"><i>_</i><i>&#9723;</i><i>&#10005;</i></span></div>
