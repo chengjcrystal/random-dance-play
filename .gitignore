@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# logs / scratch
+*.log
+
+# personal bias photos stay local, never commit copyrighted images
+photos/*
+!photos/README.txt
