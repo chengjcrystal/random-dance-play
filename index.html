@@ -275,9 +275,12 @@
     font-family: Manrope, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .02em; }
   .titlebar .tb-title { margin-right: auto; display: inline-flex; align-items: center; }
   .titlebar .tb-ctrls { display: flex; gap: 4px; }
-  .titlebar .tb-ctrls i { width: 16px; height: 14px; display: grid; place-items: center;
-    border: 1px solid var(--chrome-deep); background: linear-gradient(#ffffff, #eceef3);
-    color: var(--chrome-ink); font-style: normal; font-size: 8.5px; line-height: 1; }
+  .titlebar .tb-ctrls i { width: 18px; height: 16px; display: grid; place-items: center;
+    background: linear-gradient(#fbfcff, var(--chrome)); color: var(--chrome-ink);
+    font-style: normal; font-size: 9px; font-weight: 700; line-height: 1;
+    border: 1px solid; border-color: #ffffff var(--chrome-deep) var(--chrome-deep) #ffffff;
+    box-shadow: inset -1px -1px 0 var(--chrome-mid); }
+  .titlebar .tb-ctrls i:last-child { color: var(--red); }
 
   /* photocards: only rendered when you supply real photos in /photos. no names, no watermarks. */
   .pcards { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
@@ -315,6 +318,12 @@
   .shelf { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
   .shelf .plbtn { display: inline-flex; align-items: center; gap: 7px; background: var(--blush-soft); }
   .shelf .plbtn .ico { color: var(--rose); font-size: 14px; }
+  .shelf .plbtn .pln { display: inline-grid; place-items: center; min-width: 17px; height: 16px; padding: 0 4px;
+    font-size: 10px; font-weight: 700; background: var(--blush); color: var(--rose-deep); }
+  .shelf .plbtn.active { background: var(--red); color: #fff3f5; border-color: var(--red); }
+  .shelf .plbtn.active:hover { background: var(--red-dark); }
+  .shelf .plbtn.active .ico { color: #ffd7e2; }
+  .shelf .plbtn.active .pln { background: rgba(255,255,255,.28); color: #fff; }
   .tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1.4px solid var(--rose); margin-bottom: 15px; }
   .tabs button { border: 0; background: transparent; padding: 8px 12px; font-size: 12.5px; color: var(--muted);
     white-space: nowrap; border-bottom: 2.6px solid transparent; margin-bottom: -1.4px; }
@@ -340,6 +349,29 @@
   .tracker span { display: inline-flex; align-items: center; gap: 6px; }
   .tracker b { font-style: normal; font-weight: 600; color: var(--ink); }
   .tracker .ico { color: var(--rose); font-size: 14px; }
+
+  /* decorative y2k dialog stickers in the page margins */
+  #stickers { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+  .sticker { position: absolute; width: 134px; transform: rotate(var(--rot, 0deg));
+    background: var(--paper); border: 1px solid var(--chrome-deep);
+    box-shadow: 0 10px 22px -10px rgba(47,19,28,.42); }
+  .sticker .s-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 4px 7px; font-family: Manrope, sans-serif; font-weight: 700; font-size: 10px; color: var(--chrome-ink);
+    background: linear-gradient(#fbfcff, var(--chrome-mid)); border-bottom: 1px solid var(--chrome-deep); }
+  .sticker .s-bar b { color: var(--red); font-size: 9px; }
+  .sticker .s-body { padding: 10px 9px; }
+  .sticker .s-body p { margin: 0; display: flex; align-items: center; gap: 5px;
+    font-family: Fraunces, serif; font-style: italic; font-size: 12.5px; color: var(--ink); }
+  .sticker .s-body .ico { color: var(--red); font-size: 13px; }
+  .sticker .s-btns { display: flex; gap: 6px; margin-top: 9px; }
+  .sticker .s-btns span { border: 1px solid var(--rose); padding: 2px 8px; font-family: Manrope, sans-serif;
+    font-size: 10px; font-weight: 600; color: var(--rose-deep); }
+  .sticker .s-btns span:last-child { background: var(--red); color: #fff3f5; border-color: var(--red); }
+  .sticker .s-check { display: flex; align-items: center; gap: 6px; margin-top: 9px;
+    font-family: Manrope, sans-serif; font-size: 10px; font-weight: 600; color: var(--rose-deep); }
+  .sticker .s-check i { width: 14px; height: 14px; display: grid; place-items: center;
+    border: 1.4px solid var(--red); color: var(--red); font-style: normal; font-size: 9px; }
+  @media (max-width: 1400px) { #stickers { display: none; } }
 
   @media (max-width: 540px) {
     .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
@@ -602,6 +634,26 @@ https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
   </div>
 </div>
 
+<!-- decorative y2k dialog stickers, margins only on wide screens -->
+<div id="stickers" aria-hidden="true">
+  <div class="sticker" style="left:20px; top:150px; --rot:-4deg;">
+    <div class="s-bar"><span>error.exe</span><b>&#10005;</b></div>
+    <div class="s-body"><p>system error :(</p><div class="s-btns"><span>oh no</span><span>ok</span></div></div>
+  </div>
+  <div class="sticker" style="left:30px; top:472px; --rot:5deg;">
+    <div class="s-bar"><span>hello.exe</span><b>&#10005;</b></div>
+    <div class="s-body"><p>hello human!<svg class="ico"><use href="#i-cherry"/></svg></p></div>
+  </div>
+  <div class="sticker" style="right:20px; top:140px; --rot:4deg;">
+    <div class="s-bar"><span>captcha</span><b>&#10005;</b></div>
+    <div class="s-body"><p>i am not a robot</p><div class="s-check"><i>&#10003;</i>verified</div></div>
+  </div>
+  <div class="sticker" style="right:30px; top:452px; --rot:-5deg;">
+    <div class="s-bar"><span>rdp.exe</span><b>&#10005;</b></div>
+    <div class="s-body"><p>let's dance offline!</p><div class="s-btns"><span>no thx</span><span>yes!</span></div></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -791,6 +843,7 @@ function renderLibrary() {
     songs.length ? (eligibleSongs().length + ' ready of ' + songs.length) : '';
   renderTracker();
   if (typeof renderCatalog === 'function') renderCatalog();
+  if (typeof renderShelf === 'function') renderShelf();
 }
 
 function songCard(s, i) {
@@ -1369,14 +1422,25 @@ function buildCatTabs() {
     wrap.appendChild(b);
   }
 }
-function buildShelf() {
+let surpriseIds = [];
+function playlistActive(pl) {
+  const cats = pl.pick ? CATALOG.filter(pl.pick)
+    : surpriseIds.map(id => CATALOG.find(c => c.youtubeId === id)).filter(Boolean);
+  return cats.length > 0 && cats.every(c => inLibrary(c.youtubeId));
+}
+function renderShelf() {
   const wrap = document.getElementById('cat-shelf');
+  if (!wrap) return;
   wrap.innerHTML = '';
   for (const pl of PLAYLISTS) {
+    const active = playlistActive(pl);
+    const count = pl.pick ? CATALOG.filter(pl.pick).length : 6;
     const b = document.createElement('button');
-    b.className = 'small plbtn';
-    b.innerHTML = '<svg class="ico"><use href="#' + pl.ico + '"/></svg>' + pl.label;
-    b.onclick = () => loadPlaylist(pl);
+    b.className = 'small plbtn' + (active ? ' active' : '');
+    if (active) b.title = 'click again to remove these';
+    b.innerHTML = '<svg class="ico"><use href="#' + pl.ico + '"/></svg>' + pl.label +
+      '<span class="pln">' + count + '</span>';
+    b.onclick = () => togglePlaylist(pl);
     wrap.appendChild(b);
   }
 }
@@ -1434,13 +1498,36 @@ function removeFromCatalog(c) {
   saveSongs(); renderLibrary();
   toast('Removed ' + c.name.replace(c.group + ' - ', ''));
 }
-function loadPlaylist(pl) {
-  const picks = pl.pick ? CATALOG.filter(pl.pick) : shuffle(CATALOG).slice(0, 6);
-  let n = 0;
-  for (const c of picks) { if (inLibrary(c.youtubeId)) continue; songs.push(catToSong(c)); n++; }
-  if (n === 0) { toast('Those are already in your library.'); return; }
-  saveSongs(); renderLibrary();
-  toast('Added ' + n + ' song' + (n === 1 ? '' : 's') + ' from ' + pl.label + '.');
+function togglePlaylist(pl) {
+  if (pl.key === 'surprise') {
+    if (surpriseIds.length && surpriseIds.every(id => inLibrary(id))) {
+      const drop = new Set(surpriseIds);
+      songs = songs.filter(s => !drop.has(s.youtubeId));
+      surpriseIds = [];
+      saveSongs(); renderLibrary();
+      toast('Removed the surprise six.');
+    } else {
+      const picks = shuffle(CATALOG).slice(0, 6);
+      surpriseIds = picks.map(c => c.youtubeId);
+      let n = 0;
+      for (const c of picks) if (!inLibrary(c.youtubeId)) { songs.push(catToSong(c)); n++; }
+      saveSongs(); renderLibrary();
+      toast('Added ' + n + ' surprise song' + (n === 1 ? '' : 's') + '.');
+    }
+    return;
+  }
+  const cats = CATALOG.filter(pl.pick);
+  if (cats.every(c => inLibrary(c.youtubeId))) {
+    const drop = new Set(cats.map(c => c.youtubeId));
+    songs = songs.filter(s => !drop.has(s.youtubeId));
+    saveSongs(); renderLibrary();
+    toast('Removed ' + cats.length + ' from ' + pl.label + '.');
+  } else {
+    let n = 0;
+    for (const c of cats) if (!inLibrary(c.youtubeId)) { songs.push(catToSong(c)); n++; }
+    saveSongs(); renderLibrary();
+    toast('Added ' + n + ' from ' + pl.label + '.');
+  }
 }
 
 function renderTracker() {
@@ -1460,7 +1547,7 @@ function renderTracker() {
 
 document.getElementById('cat-search').addEventListener('input', e => { catSearch = e.target.value; renderCatalog(); });
 
-buildShelf();
+renderShelf();
 buildCatTabs();
 
 buildPhotocards();
