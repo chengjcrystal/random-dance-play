@@ -1,9 +1,9 @@
 # Random Dance Play
 
-A little web app for random play dance (RPD): it shuffles clips of K-pop dance
-sections, hides the song name for a few seconds so you can guess, then reveals it
-and moves to the next one. Fun for solo or group play, and it casts to a TV by
-casting the browser tab.
+A little web app for random play dance (RPD): it shuffles clips of mirrored K-pop
+dance-practice videos (no lyrics, so you can actually dance along), hides the song
+name for a few seconds so you can guess, then reveals it and moves to the next one.
+Fun for solo or group play, and it casts to a TV by casting the browser tab.
 
 No accounts, no backend, no build step, nothing downloaded. Playback runs through
 the official YouTube IFrame Player API and your library lives in the browser. This
