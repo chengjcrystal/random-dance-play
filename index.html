@@ -10,24 +10,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --cream: #fbf4f6;
-    --paper: #fffdfe;
-    --blush: #ffe6ef;
-    --blush-soft: #fdf1f4;
-    --rose: #e58aad;
-    --rose-deep: #bf5c84;
-    --red: #d21f45;
-    --red-dark: #a51533;
-    --ink: #43222f;
-    --muted: #9a7382;
-    --wine: #1c0f15;
-    --gold: #c39a4c;
-    /* chrome window-frame system (authentic y2k, replaces candy cyan) */
-    --chrome: #f4f5f8;
-    --chrome-mid: #d6d8e2;
-    --chrome-deep: #a7abbb;
-    --chrome-ink: #40424f;
-    --line: #eccdd6;
+    --cream: #f3e6ea;
+    --paper: #fffbfc;
+    --blush: #ffd3e2;
+    --blush-soft: #f6e2e9;
+    --rose: #d4658c;
+    --rose-deep: #a53f65;
+    --red: #ce1236;
+    --red-dark: #9c0b28;
+    --ink: #2f131c;
+    --muted: #855968;
+    --wine: #160a0f;
+    --gold: #bb8f42;
+    /* chrome / silver window-frame + accent system (authentic y2k) */
+    --chrome: #eceef4;
+    --chrome-mid: #c9cdda;
+    --chrome-deep: #969bb0;
+    --chrome-ink: #363945;
+    --silver: #b9becf;
+    --line: #e3bccb;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -37,8 +38,8 @@
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     background:
-      radial-gradient(120% 60% at 50% -8%, #ffeaf1 0%, transparent 60%),
-      linear-gradient(#fdf6f8, #fbeef2);
+      radial-gradient(130% 74% at 50% -14%, #ffb0cb 0%, transparent 54%),
+      linear-gradient(#ecd6de, #ddbecb);
     background-attachment: fixed;
   }
   h1, h2, h3 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; }
@@ -106,8 +107,9 @@
   /* bold rule-and-star divider */
   .divider { display: flex; align-items: center; justify-content: center; gap: 16px;
     max-width: 360px; margin: 14px auto 30px; }
-  .divider .rule { flex: 1; height: 2.5px; background: var(--ink); }
-  .divider .st { font-size: 20px; color: var(--red); }
+  .divider .rule { flex: 1; height: 3px; background: linear-gradient(var(--chrome-mid), var(--chrome-deep));
+    box-shadow: 0 1px 0 rgba(255,255,255,.6); }
+  .divider .st { font-size: 21px; color: var(--red); }
 
   .settings-fab { position: fixed; top: 16px; right: 16px; z-index: 20; display: inline-flex; align-items: center; gap: 6px; }
   .settings-fab .ico { font-size: 15px; color: var(--rose-deep); }
@@ -292,7 +294,7 @@
 
   /* big star behind wordmark */
   .hero .bigstar { position: absolute; left: 1%; top: 46%; transform: translateY(-50%) rotate(-10deg);
-    width: clamp(80px, 15vw, 150px); height: auto; color: var(--blush); z-index: 0; }
+    width: clamp(80px, 15vw, 150px); height: auto; color: var(--silver); opacity: .72; z-index: 0; }
   .hero .wordmark, .hero .kicker, .hero .tagline { position: relative; z-index: 1; }
   @media (max-width: 720px) { .hero .bigstar { display: none; } }
 
@@ -1322,23 +1324,27 @@ const PLAYLISTS = [
   { key: 'surprise', label: 'Surprise six',   ico: 'i-fly',   pick: null },
 ];
 
-let catSearch = '', catGroup = 'All';
+/* only boy groups are listed here; everything else in the catalog is a girl group or female soloist */
+const BOY_GROUPS = new Set(['TWS', 'ENHYPEN', 'BOYNEXTDOOR']);
+function genderOf(group) { return BOY_GROUPS.has(group) ? 'boy' : 'girl'; }
+const CAT_TABS = [
+  { key: 'all',  label: 'All' },
+  { key: 'girl', label: 'Girl groups' },
+  { key: 'boy',  label: 'Boy groups' },
+];
 
-function catGroups() {
-  const seen = [];
-  for (const c of CATALOG) if (!seen.includes(c.group)) seen.push(c.group);
-  return ['All', ...seen];
-}
+let catSearch = '', catFilter = 'all';
+
 function inLibrary(id) { return songs.some(s => s.youtubeId === id); }
 
 function buildCatTabs() {
   const wrap = document.getElementById('cat-tabs');
   wrap.innerHTML = '';
-  for (const g of catGroups()) {
+  for (const t of CAT_TABS) {
     const b = document.createElement('button');
-    b.type = 'button'; b.textContent = g;
-    b.className = g === catGroup ? 'active' : '';
-    b.onclick = () => { catGroup = g; renderCatalog(); };
+    b.type = 'button'; b.textContent = t.label;
+    b.className = t.key === catFilter ? 'active' : '';
+    b.onclick = () => { catFilter = t.key; renderCatalog(); };
     wrap.appendChild(b);
   }
 }
@@ -1362,9 +1368,12 @@ function renderCatalog() {
   const grid = document.getElementById('cat-grid');
   if (!grid) return;
   const q = catSearch.trim().toLowerCase();
-  let list = CATALOG.filter(c => catGroup === 'All' || c.group === catGroup);
+  let list = CATALOG.filter(c => catFilter === 'all' || genderOf(c.group) === catFilter);
   if (q) list = list.filter(c => (c.name + ' ' + c.group).toLowerCase().includes(q));
-  document.querySelectorAll('#cat-tabs button').forEach(b => b.classList.toggle('active', b.textContent === catGroup));
+  document.querySelectorAll('#cat-tabs button').forEach(b => {
+    const t = CAT_TABS.find(x => x.label === b.textContent);
+    b.classList.toggle('active', !!t && t.key === catFilter);
+  });
   grid.innerHTML = '';
   if (CATALOG.length === 0) { grid.innerHTML = '<div class="noresult">catalog loading...</div>'; return; }
   if (list.length === 0) { grid.innerHTML = '<div class="noresult">no matches, try another search</div>'; return; }
