@@ -161,7 +161,8 @@
   .card .acts { display: flex; gap: 6px; margin-top: auto; }
   .card .acts button { flex: 1; }
   .card .acts .del { flex: 0 0 auto; }
-  .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 56px 14px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; }
+  .grid.is-empty { border: 0; }
+  .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px 14px 10px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; }
 
   /* ---- screens ---- */
   .screen { display: none; }
@@ -474,7 +475,6 @@
       <svg class="ico cherry l"><use href="#i-cherry"/></svg>
       <svg class="ico cherry r"><use href="#i-cherry"/></svg>
       <div class="rules top"></div>
-      <div class="kicker">a random dance play</div>
       <h1 class="wordmark">Random <em>Dance</em> Play</h1>
       <div class="tagline">pick your songs, hit play, guess the song, dance</div>
       <div class="rules bot"></div>
@@ -496,8 +496,7 @@
       <div class="inner">
         <p class="note">Not in the catalog? Paste any YouTube links here, one per line. Names fill in automatically and each gets a starter clip. Optional: put a name before the link.</p>
         <textarea id="add-bulk" placeholder="https://youtu.be/xxxxxxxxxxx
-NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx
-https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
+NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
         <div class="go"><button class="primary" id="btn-add">Add to Library</button></div>
       </div>
     </div>
@@ -841,6 +840,7 @@ function renderLibrary() {
   } else {
     songs.forEach((s, i) => songlistEl.appendChild(songCard(s, i)));
   }
+  songlistEl.classList.toggle('is-empty', songs.length === 0);
   document.getElementById('btn-play').disabled = eligibleSongs().length === 0;
   document.getElementById('btn-clear').hidden = songs.length === 0;
   document.getElementById('lib-count').textContent =
