@@ -249,9 +249,9 @@
     border: 1.4px solid var(--rose); opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  details.run { margin-top: 34px; font-size: 13px; color: var(--muted); }
-  details.run summary { cursor: pointer; font-family: Fraunces, serif; font-style: italic; color: var(--rose-deep); font-size: 15px; }
-  details.run p { line-height: 1.65; margin-top: 8px; }
+  .runbox { margin-top: 30px; }
+  .runbox .inner { padding: 16px; }
+  .runbox .note { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
   code { font-family: ui-monospace, monospace; background: var(--blush-soft); border: 1px solid var(--rose); padding: 1px 6px; font-size: 12px; }
 
   /* ---- k-pop y2k layer ---- */
@@ -498,14 +498,15 @@
         <textarea id="add-bulk" placeholder="https://youtu.be/xxxxxxxxxxx
 NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx
 https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
-        <div class="go"><button class="primary" id="btn-add">Add to library</button></div>
+        <div class="go"><button class="primary" id="btn-add">Add to Library</button></div>
       </div>
     </div>
 
     <div class="toolbar">
-      <button class="primary" id="btn-play" disabled>Play session</button>
+      <button class="primary" id="btn-play" disabled>Play Session</button>
       <span class="count" id="lib-count"></span>
       <div class="spacer"></div>
+      <button class="small" id="btn-clear" hidden>Clear Library</button>
       <button class="small" id="btn-export"><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-floppy"/></svg>Export</button>
       <button class="small" id="btn-import"><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-folder"/></svg>Import</button>
       <input type="file" id="import-file" accept="application/json,.json" hidden>
@@ -515,10 +516,12 @@ https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
 
     <div id="songlist" class="grid"></div>
 
-    <details class="run">
-      <summary>How to run and cast</summary>
-      <p>Serve over http(s). From this folder run <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000</code>. Works on any static host too. To play on a TV, open it in a desktop browser and cast the tab. Your library is saved in this browser, so you only build it once.</p>
-    </details>
+    <div class="win runbox">
+      <div class="titlebar"><span class="tb-title">how_to_run.txt</span><span class="tb-ctrls"><i>_</i><i>&#9723;</i><i>&#10005;</i></span></div>
+      <div class="inner">
+        <p class="note">Serve over http(s). From this folder run <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000</code>. Works on any static host too. To play on a TV, open it in a desktop browser and cast the tab. Your library is saved in this browser, so you only build it once.</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -528,15 +531,15 @@ https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
     <div class="backbar">
       <button class="small" id="btn-editor-back">Back</button>
       <div class="spacer"></div>
-      <h1 id="editor-title">Set clip</h1>
+      <h1 id="editor-title">Set Clip</h1>
     </div>
 
     <div class="playerbox"><div id="editor-player-wrap" style="position:absolute;inset:0;"><div class="ytplayer"></div></div></div>
 
     <div class="controls">
       <div class="setbtns">
-        <button id="btn-set-start">Set start</button>
-        <button id="btn-set-end">Set end</button>
+        <button id="btn-set-start">Set Start</button>
+        <button id="btn-set-end">Set End</button>
         <button id="btn-preview">Preview</button>
       </div>
       <div class="timefields">
@@ -545,7 +548,7 @@ https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
       </div>
       <p class="editor-hint">Scrub the video, then tap Set start and Set end where you want the dance section. Preview to confirm.</p>
       <div style="display:flex;gap:12px;">
-        <button class="primary" style="flex:1" id="btn-save-clip">Save clip</button>
+        <button class="primary" style="flex:1" id="btn-save-clip">Save Clip</button>
         <button id="btn-cancel-clip">Cancel</button>
       </div>
     </div>
@@ -598,7 +601,7 @@ https://www.youtube.com/shorts/xxxxxxxxxxx"></textarea>
 <!-- ================= EDIT MODAL ================= -->
 <div class="backdrop" id="edit-modal">
   <div class="modal">
-    <h2><svg class="ico"><use href="#i-star"/></svg>Edit song</h2>
+    <h2><svg class="ico"><use href="#i-star"/></svg>Edit Song</h2>
     <label class="field"><span>name</span><input id="em-name"></label>
     <label class="field"><span>youtube url or id</span><input id="em-url"></label>
     <p class="hint" id="em-hint"></p>
@@ -839,6 +842,7 @@ function renderLibrary() {
     songs.forEach((s, i) => songlistEl.appendChild(songCard(s, i)));
   }
   document.getElementById('btn-play').disabled = eligibleSongs().length === 0;
+  document.getElementById('btn-clear').hidden = songs.length === 0;
   document.getElementById('lib-count').textContent =
     songs.length ? (eligibleSongs().length + ' ready of ' + songs.length) : '';
   renderTracker();
@@ -862,7 +866,7 @@ function songCard(s, i) {
       '<div class="name"></div>' +
       '<div class="status"><i class="dot ' + dot + '"></i><span></span></div>' +
       '<div class="acts">' +
-        '<button class="small" data-act="clip">Set clip</button>' +
+        '<button class="small" data-act="clip">Set Clip</button>' +
         '<button class="small" data-act="edit">Edit</button>' +
         '<button class="small del" data-act="del">Del</button>' +
       '</div>' +
@@ -946,6 +950,13 @@ document.getElementById('em-save').onclick = () => {
 };
 
 /* ---------- import / export ---------- */
+document.getElementById('btn-clear').onclick = () => {
+  if (!songs.length) return;
+  if (confirm('Remove all ' + songs.length + ' songs from your library? This cannot be undone.')) {
+    songs = []; surpriseIds = []; saveSongs(); renderLibrary();
+    toast('Library cleared.');
+  }
+};
 document.getElementById('btn-export').onclick = () => {
   const data = JSON.stringify({ version: 1, songs, settings }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
@@ -1016,7 +1027,7 @@ async function openEditor(id) {
   editorSongId = id;
   tempStart = isFiniteNum(s.startSec) ? s.startSec : 0;
   tempEnd = isFiniteNum(s.endSec) ? s.endSec : 0;
-  document.getElementById('editor-title').textContent = s.name || 'Set clip';
+  document.getElementById('editor-title').textContent = s.name || 'Set Clip';
   document.getElementById('edit-start').value = fmt(tempStart);
   document.getElementById('edit-end').value = fmt(tempEnd);
   showScreen('editor');
@@ -1393,9 +1404,9 @@ const CATALOG = [
 ];
 
 const PLAYLISTS = [
-  { key: 'bias',     label: 'Bias picks',     ico: 'i-spark', pick: c => ['TWICE', 'ILLIT', 'LE SSERAFIM'].includes(c.group) },
-  { key: 'all',      label: 'Add everything', ico: 'i-star',  pick: () => true },
-  { key: 'surprise', label: 'Surprise six',   ico: 'i-fly',   pick: null },
+  { key: 'bias',     label: 'Bias Picks',     ico: 'i-spark', pick: c => ['TWICE', 'ILLIT', 'LE SSERAFIM'].includes(c.group) },
+  { key: 'all',      label: 'Add Everything', ico: 'i-star',  pick: () => true },
+  { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   pick: null },
 ];
 
 /* only boy groups are listed here; everything else in the catalog is a girl group or female soloist */
@@ -1403,8 +1414,8 @@ const BOY_GROUPS = new Set(['TWS', 'ENHYPEN', 'BOYNEXTDOOR']);
 function genderOf(group) { return BOY_GROUPS.has(group) ? 'boy' : 'girl'; }
 const CAT_TABS = [
   { key: 'all',  label: 'All' },
-  { key: 'girl', label: 'Girl groups' },
-  { key: 'boy',  label: 'Boy groups' },
+  { key: 'girl', label: 'Girl Groups' },
+  { key: 'boy',  label: 'Boy Groups' },
 ];
 
 let catSearch = '', catFilter = 'all';
