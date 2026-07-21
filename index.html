@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Random Dance Play</title>
+<meta name="description" content="A cute K-pop random play dance game. Add songs, shuffle their official dance-practice clips, guess each one, then dance. No account, nothing downloaded.">
+<meta name="theme-color" content="#f1e6df">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23bd0f30' stroke-width='8' stroke-linecap='round'%3E%3Cpath d='M34 60 C35 40 53 26 75 18'/%3E%3Cpath d='M67 64 C61 44 65 30 79 18'/%3E%3C/g%3E%3Cpath fill='%23bd0f30' d='M75 18 C83 6 98 9 96 21 C94 32 81 32 75 18Z'/%3E%3Ccircle cx='31' cy='74' r='21' fill='%23bd0f30'/%3E%3Ccircle cx='69' cy='78' r='18' fill='%23bd0f30'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,7 +145,8 @@
   .card .status .dot.none::before { content: '\2606'; }
   .card .acts { display: flex; gap: 6px; margin-top: auto; }
   .card .acts button { flex: 1; }
-  .card .acts .del { flex: 0 0 auto; }
+  .card .acts .del { flex: 0 0 auto; padding: 6px 9px; }
+  .card .acts .del .ico { font-size: 15px; color: var(--rose-deep); vertical-align: -.16em; }
   .grid.is-empty { border: 0; }
   .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px 14px 10px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; }
 
@@ -424,6 +427,7 @@
   <symbol id="i-play" viewBox="0 0 100 100"><path fill="currentColor" d="M28 18 L82 50 L28 82 Z"/></symbol>
   <symbol id="i-skip" viewBox="0 0 100 100"><path fill="currentColor" d="M24 20 L60 50 L24 80 Z"/><rect x="64" y="20" width="13" height="60" rx="2" fill="currentColor"/></symbol>
   <symbol id="i-replay" viewBox="0 0 100 100"><path fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" d="M78 34 A34 34 0 1 0 84 55"/><path fill="currentColor" d="M64 8 L84 34 L54 38 Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 100 100"><rect x="20" y="24" width="60" height="11" rx="3" fill="currentColor"/><rect x="40" y="13" width="20" height="10" rx="3" fill="currentColor"/><path fill="currentColor" d="M28 39 h44 l-4 45 a8 8 0 0 1 -8 7 H40 a8 8 0 0 1 -8 -7 z"/></symbol>
 </defs></svg>
 
 <!-- ================= LIBRARY ================= -->
@@ -482,9 +486,9 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
     <div id="songlist" class="grid"></div>
 
     <div class="win runbox">
-      <div class="titlebar"><span class="tb-title">how_to_run.txt</span><span class="tb-ctrls"><i>_</i><i>&#9723;</i><i>&#10005;</i></span></div>
+      <div class="titlebar"><span class="tb-title">tips.txt</span><span class="tb-ctrls"><i>_</i><i>&#9723;</i><i>&#10005;</i></span></div>
       <div class="inner">
-        <p class="note">Serve over http(s). From this folder run <code>python3 -m http.server 8000</code> then open <code>http://localhost:8000</code>. Works on any static host too. To play on a TV, open it in a desktop browser and cast the tab. Your library is saved in this browser, so you only build it once.</p>
+        <p class="note">Play on a TV by casting this browser tab. Your library saves right here in your browser, so you build it once and it is ready next time. Everything runs on your device: no account, nothing downloaded, and it keeps working offline once the page has loaded.</p>
       </div>
     </div>
   </div>
@@ -505,13 +509,13 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
       <div class="setbtns">
         <button id="btn-set-start">Set Start</button>
         <button id="btn-set-end">Set End</button>
-        <button id="btn-preview">Preview</button>
+        <button id="btn-preview">Play Clip</button>
       </div>
       <div class="timefields">
         <label class="field"><span>start (mm:ss)</span><input id="edit-start" value="0:00"></label>
         <label class="field"><span>end (mm:ss)</span><input id="edit-end" value="0:00"></label>
       </div>
-      <p class="editor-hint">Scrub the video, then tap Set Start and Set End where you want the dance section. Preview to confirm.</p>
+      <p class="editor-hint">This plays your current clip. Scrub the video, tap Set Start and Set End to change where the dance section is, then Play Clip to check it. Clip length <b id="clip-len">0:00</b>.</p>
       <div style="display:flex;gap:12px;">
         <button class="primary" style="flex:1" id="btn-save-clip">Save Clip</button>
         <button id="btn-cancel-clip">Cancel</button>
@@ -832,7 +836,7 @@ function songCard(s, i) {
       '<div class="acts">' +
         '<button class="small" data-act="clip">Set Clip</button>' +
         '<button class="small" data-act="edit">Edit</button>' +
-        '<button class="small del" data-act="del">Del</button>' +
+        '<button class="small del" data-act="del" title="delete" aria-label="delete"><svg class="ico"><use href="#i-trash"/></svg></button>' +
       '</div>' +
     '</div>';
   el.querySelector('.name').textContent = s.name || '(fetching name...)';
@@ -994,6 +998,7 @@ async function openEditor(id) {
   document.getElementById('editor-title').textContent = s.name || 'Set Clip';
   document.getElementById('edit-start').value = fmt(tempStart);
   document.getElementById('edit-end').value = fmt(tempEnd);
+  updateClipLen();
   showScreen('editor');
   const hasClipRange = tempEnd > tempStart;
   await makePlayer('editor-player-wrap', {
@@ -1023,26 +1028,32 @@ function startEditorPoll() {
   }, 150);
 }
 function stopEditorPoll() { if (editorPoll) { clearInterval(editorPoll); editorPoll = null; } }
+function updateClipLen() {
+  const cl = document.getElementById('clip-len');
+  if (cl) cl.textContent = tempEnd > tempStart ? fmt(tempEnd - tempStart) : '0:00';
+}
 
 document.getElementById('btn-set-start').onclick = () => {
   if (!player || !player.getCurrentTime) return;
   tempStart = Math.max(0, player.getCurrentTime());
   document.getElementById('edit-start').value = fmt(tempStart);
+  updateClipLen();
 };
 document.getElementById('btn-set-end').onclick = () => {
   if (!player || !player.getCurrentTime) return;
   tempEnd = Math.max(0, player.getCurrentTime());
   document.getElementById('edit-end').value = fmt(tempEnd);
+  updateClipLen();
 };
 document.getElementById('edit-start').addEventListener('change', e => {
   const v = parseTime(e.target.value);
   if (v == null) { e.target.value = fmt(tempStart); toast('Use mm:ss or seconds.'); return; }
-  tempStart = v; e.target.value = fmt(v);
+  tempStart = v; e.target.value = fmt(v); updateClipLen();
 });
 document.getElementById('edit-end').addEventListener('change', e => {
   const v = parseTime(e.target.value);
   if (v == null) { e.target.value = fmt(tempEnd); toast('Use mm:ss or seconds.'); return; }
-  tempEnd = v; e.target.value = fmt(v);
+  tempEnd = v; e.target.value = fmt(v); updateClipLen();
 });
 document.getElementById('btn-preview').onclick = () => {
   if (!(tempEnd > tempStart)) { toast('Set an end after the start first.'); return; }
