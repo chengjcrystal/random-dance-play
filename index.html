@@ -149,6 +149,9 @@
   .card .acts button { flex: 1; }
   .card .acts .del { flex: 0 0 auto; padding: 6px 9px; }
   .card .acts .del .ico { font-size: 15px; color: var(--rose-deep); vertical-align: -.16em; }
+  .card .acts .lenbtn .ico { vertical-align: -.14em; }
+  .card .acts .lenbtn.on { background: var(--red); border-color: var(--red); color: #fff3f5; }
+  .card .acts .lenbtn.on:hover:not(:disabled) { background: var(--red-dark); border-color: var(--red-dark); }
   .grid.is-empty { border: 0; }
   .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px 14px 10px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; }
 
@@ -604,7 +607,7 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
 
     <div class="startgate" id="startgate">
       <h2>ready to dance?</h2>
-      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each song plays hidden, then the name is revealed. Songs you marked <b>full song known</b> play the whole track; the rest are quick guess-clips.</p>
+      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each song plays hidden, then the name is revealed. Everything plays a quick guess-clip by default; songs you set to <b>Full song</b> in your setlist play the whole track. The order reshuffles every session.</p>
       <button class="primary" id="btn-start-session"><svg class="ico" style="font-size:14px;margin-right:8px"><use href="#i-play"/></svg>Start</button>
       <button class="link" id="btn-quit-early" style="color:rgba(255,220,232,.8)">back to library</button>
     </div>
@@ -878,12 +881,18 @@ function renderLibrary() {
 function songCard(s, i) {
   const el = document.createElement('div');
   el.className = 'card';
+  const kn = known.has(s.youtubeId);
+  const full = isFull(s);
   let dot, statusText;
   if (errored.has(s.youtubeId)) { dot = 'err'; statusText = 'playback error'; }
-  else if (isFull(s)) { dot = 'ready'; statusText = 'full song known · plays whole track'; }
+  else if (full) { dot = 'ready'; statusText = 'full song · plays whole track'; }
   else if (hasClip(s) && s.auto) { dot = 'auto'; statusText = 'auto ' + fmt(s.startSec) + '–' + fmt(s.endSec); }
   else if (hasClip(s)) { dot = 'ready'; statusText = fmt(s.startSec) + '–' + fmt(s.endSec); }
   else { dot = 'none'; statusText = 'no clip set'; }
+  const lenToggle = kn
+    ? '<button class="small lenbtn' + (full ? ' on' : '') + '" data-act="fulllen" title="you know this one fully: play the whole track or just the clip">' +
+        '<svg class="ico" style="font-size:12px;margin-right:5px"><use href="#i-play"/></svg>' + (full ? 'Full song' : 'Chorus') + '</button>'
+    : '';
   el.innerHTML =
     '<div class="thumbwrap"><img loading="lazy" src="' + thumb(s.youtubeId) + '" alt="">' +
       '<span class="idx">' + String(i + 1).padStart(2, '0') + '</span></div>' +
@@ -891,6 +900,7 @@ function songCard(s, i) {
       '<div class="name"></div>' +
       '<div class="status"><i class="dot ' + dot + '"></i><span></span></div>' +
       '<div class="acts">' +
+        lenToggle +
         '<button class="small" data-act="clip"><svg class="ico" style="font-size:13px;margin-right:5px"><use href="#i-scissors"/></svg>Set Clip</button>' +
         '<button class="small" data-act="edit"><svg class="ico" style="font-size:12px;margin-right:5px"><use href="#i-pencil"/></svg>Edit</button>' +
         '<button class="small del" data-act="del" title="delete" aria-label="delete"><svg class="ico"><use href="#i-trash"/></svg></button>' +
@@ -898,6 +908,8 @@ function songCard(s, i) {
     '</div>';
   el.querySelector('.name').textContent = s.name || '(fetching name...)';
   el.querySelector('.status span').textContent = statusText;
+  const lenEl = el.querySelector('[data-act="fulllen"]');
+  if (lenEl) lenEl.onclick = () => { togglePlayFull(s.youtubeId); renderLibrary(); };
   el.querySelector('[data-act="clip"]').onclick = () => openEditor(s.id);
   el.querySelector('[data-act="edit"]').onclick = () => openEditModal(s.id);
   el.querySelector('[data-act="del"]').onclick = () => {
@@ -1169,10 +1181,17 @@ function shuffle(arr) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
+let lastQueue = [];
 function buildQueue() {
-  queue = shuffle(eligibleSongs().map(s => s.id));
+  const ids = eligibleSongs().map(s => s.id);
+  // reshuffle every session/replay, and avoid handing back the exact same order twice
+  let next = shuffle(ids);
+  for (let i = 0; ids.length > 1 && i < 6 && sameOrder(next, lastQueue); i++) next = shuffle(ids);
+  queue = next;
+  lastQueue = next.slice();
   queueIndex = 0;
 }
+function sameOrder(a, b) { return a.length === b.length && a.every((v, i) => v === b[i]); }
 
 document.getElementById('btn-play').onclick = () => {
   if (eligibleSongs().length === 0) { toast('Add at least one song with a clip.'); return; }
@@ -1518,13 +1537,22 @@ let favs = new Set((() => { try { return JSON.parse(localStorage.getItem(FAVS_KE
 function saveFavs() { localStorage.setItem(FAVS_KEY, JSON.stringify([...favs])); }
 function toggleFav(id) { if (favs.has(id)) favs.delete(id); else favs.add(id); saveFavs(); }
 
-/* known: songs you know start-to-finish. separate from faves. a known song plays its
-   full track in a session instead of a guess-clip. */
+/* known: songs you know start-to-finish. separate from faves. marking a song known
+   just unlocks a per-song playback choice in the setlist; it does not by itself change
+   how the song plays. */
 const KNOWN_KEY = 'rpd.known.v1';
 let known = new Set((() => { try { return JSON.parse(localStorage.getItem(KNOWN_KEY) || '[]'); } catch { return []; } })());
 function saveKnown() { localStorage.setItem(KNOWN_KEY, JSON.stringify([...known])); }
 function toggleKnown(id) { if (known.has(id)) known.delete(id); else known.add(id); saveKnown(); }
-function isFull(s) { return s && known.has(s.youtubeId); }
+
+/* play-full: opt-in per song. even when you know a song fully, it defaults to the
+   clip (chorus); flip this on in the setlist to play the whole track instead. */
+const PLAYFULL_KEY = 'rpd.playfull.v1';
+let playFull = new Set((() => { try { return JSON.parse(localStorage.getItem(PLAYFULL_KEY) || '[]'); } catch { return []; } })());
+function savePlayFull() { localStorage.setItem(PLAYFULL_KEY, JSON.stringify([...playFull])); }
+function togglePlayFull(id) { if (playFull.has(id)) playFull.delete(id); else playFull.add(id); savePlayFull(); }
+/* only play the whole track when the song is known AND you opted it into full playback */
+function isFull(s) { return !!(s && known.has(s.youtubeId) && playFull.has(s.youtubeId)); }
 
 const PLAYLISTS = [
   { key: 'fav',      label: 'Add Faves',      ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
@@ -1630,7 +1658,7 @@ function catCardEl(c) {
   card.innerHTML =
     '<div class="cthumb"><img loading="lazy" src="' + thumb(c.youtubeId) + '" alt="">' +
       '<button class="favbtn' + (fav ? ' on' : '') + '" title="favorite" aria-label="favorite"><svg class="ico"><use href="#i-star"/></svg></button>' +
-      '<button class="knownbtn' + (kn ? ' on' : '') + '" title="Full Song Known: you know this one start to finish, so it plays the whole track" aria-label="mark full song known"><svg class="ico"><use href="#i-check"/></svg></button></div>' +
+      '<button class="knownbtn' + (kn ? ' on' : '') + '" title="Full Song Known: you know this one start to finish. It still plays the clip by default; switch it to Full song in your setlist." aria-label="mark full song known"><svg class="ico"><use href="#i-check"/></svg></button></div>' +
     '<div class="meta"><div class="cname"></div><div class="cgrp"></div></div>' +
     '<button class="small addbtn' + (added ? ' added' : '') + '">' + (added ? 'Added' : 'Add') + '</button>';
   card.querySelector('.cname').textContent = c.name.replace(c.group + ' - ', '');

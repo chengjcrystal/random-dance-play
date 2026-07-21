@@ -22,12 +22,16 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
 - Two per-song marks: tap the star to favorite a song, or the check to mark it Full
   Song Known (you know it start to finish). Filter the catalog by Faves / Full Song
   Known / Girl / Boy groups and sort by group or A to Z.
+- Marking a song Full Song Known doesn't change how it plays on its own. It unlocks a
+  Chorus / Full song toggle on that song in your setlist, defaulting to the short clip,
+  so you decide which known songs actually play their whole track.
 - Load a whole playlist in one tap (Add Faves, Full Song, Add Everything,
   Surprise Six). Adding or removing doesn't jump your scroll: the catalog stays put.
-- In a session, songs you marked Full Song Known play their full track; everything else
-  plays a short guess-clip. No global toggle to remember.
+- In a session, everything plays a short guess-clip unless you flipped a known song to
+  Full song, which plays its whole track. No global toggle to remember.
 - Play a session: each song plays with the name hidden, reveals after a guess
-  window, counts down, then auto-advances to the next random one.
+  window, counts down, then auto-advances to the next random one. The order reshuffles
+  on every session and every Play Again, and avoids repeating the previous run's order.
 - Everything saves in your browser. Export and import JSON to back up or move it
   between devices.
 
