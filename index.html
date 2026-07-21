@@ -1064,7 +1064,7 @@ function leaveEditor() {
 let queue = [], queueIndex = 0, round = 1, lastRoundLastId = null;
 let phase = 'idle', isPaused = false;
 let playPoll = null, nextTimer = null, clipEnding = false, lastSkipAt = 0;
-let effStart = 0, effEnd = 0;
+let effStart = 0, effEnd = 0, clipStarted = false, clipLoadAt = 0;
 
 const el = {
   startgate: document.getElementById('startgate'),
@@ -1116,7 +1116,7 @@ document.getElementById('btn-start-session').onclick = async () => {
   el.startgate.classList.add('hide');
   await makePlayer('play-player-wrap', {
     videoId: currentSong().youtubeId,
-    vars: { controls: 0, rel: 0, playsinline: 1, modestbranding: 1, fs: 0, disablekb: 1, iv_load_policy: 3 },
+    vars: { controls: 0, rel: 0, playsinline: 1, modestbranding: 1, fs: 0, disablekb: 1, iv_load_policy: 3, cc_load_policy: 0 },
     onStateChange: onPlayState,
     onError: onPlayError,
   });
@@ -1133,7 +1133,7 @@ function loadCurrentClip() {
   const s = currentSong();
   if (!s) { endSession(); return; }
   computeBounds(s);
-  clipEnding = false; phase = 'guessing'; isPaused = false;
+  clipEnding = false; clipStarted = false; clipLoadAt = performance.now(); phase = 'guessing'; isPaused = false;
   el.pauseBtn.textContent = 'Pause';
   el.reveal.classList.remove('show');
   el.revealName.innerHTML = '';
@@ -1153,7 +1153,10 @@ function updateStatus() {
 }
 
 function onPlayState(e) {
-  if (e.data === YT.PlayerState.ENDED && (phase === 'guessing' || phase === 'playing')) clipEnded();
+  if (e.data === YT.PlayerState.PLAYING) {
+    try { player.unloadModule('captions'); player.unloadModule('cc'); } catch {}
+  }
+  if (e.data === YT.PlayerState.ENDED && clipStarted && (phase === 'guessing' || phase === 'playing')) clipEnded();
 }
 function onPlayError() {
   const s = currentSong();
@@ -1173,14 +1176,20 @@ function playTick() {
   if (phase !== 'guessing' && phase !== 'playing') return;
   if (!player || !player.getCurrentTime) return;
   const t = player.getCurrentTime();
-  // While the player is still seeking/buffering to the clip start, currentTime can
-  // read ~0. Don't run the guess/clock timers until playback reaches the start,
-  // otherwise elapsed goes negative and the countdown shows wrong numbers.
-  if (t < effStart - 1) {
-    if (phase === 'guessing' && settings.revealMode === 'afterGuessWindow')
-      el.guessSub.textContent = 'reveal in ' + settings.guessWindowSec;
-    el.clock.textContent = 'clip ' + fmt(effEnd - effStart) + ' left';
-    return;
+  // A freshly loaded clip must actually reach its window before timers run.
+  // getCurrentTime() can briefly report the PREVIOUS clip's end time (which would
+  // instantly "end" the new clip and skip the song) or ~0 while it buffers. Only
+  // arm end-detection once currentTime lands inside [effStart, effEnd).
+  if (!clipStarted) {
+    if (t >= effStart - 0.5 && t < effEnd) {
+      clipStarted = true;
+    } else {
+      if (performance.now() - clipLoadAt > 7000) { flashError(); advance(); return; }
+      if (phase === 'guessing' && settings.revealMode === 'afterGuessWindow')
+        el.guessSub.textContent = 'reveal in ' + settings.guessWindowSec;
+      el.clock.textContent = 'clip ' + fmt(effEnd - effStart) + ' left';
+      return;
+    }
   }
   if (!clipEnding && t >= effEnd) { clipEnded(); return; }
   if (phase === 'guessing') {
@@ -1243,7 +1252,7 @@ document.getElementById('btn-skip').onclick = () => {
 };
 document.getElementById('btn-replay').onclick = () => {
   if (phase === 'idle' || !player || !player.seekTo) return;
-  clearNextTimer(); clipEnding = false; phase = 'guessing';
+  clearNextTimer(); clipEnding = false; clipStarted = false; clipLoadAt = performance.now(); phase = 'guessing';
   el.nextOverlay.classList.remove('show');
   el.reveal.classList.remove('show');
   el.guessOverlay.style.display = 'flex';
