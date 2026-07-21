@@ -1216,7 +1216,7 @@ function clipEnded() {
   el.reveal.classList.remove('show');
   el.clock.textContent = '';
   const s = currentSong();
-  el.nextUp.textContent = (settings.revealMode !== 'hidden' && s) ? 'was: ' + (s.name || '(untitled)') : '';
+  el.nextUp.textContent = (settings.revealMode !== 'hidden' && s) ? 'previous: ' + (s.name || '(untitled)') : '';
   if (settings.countdownSec <= 0) { advance(); return; }
   el.nextOverlay.classList.add('show');
   runNextCountdown(settings.countdownSec, advance);
