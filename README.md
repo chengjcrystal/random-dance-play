@@ -17,7 +17,10 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
   aespa, IVE, and more) and one-tap add. Each song comes with a clip already set,
   so you can play right away with nothing to type.
 - Or paste any YouTube link for songs that aren't in the catalog.
-- Load a whole playlist in one tap (My Fav Groups, Add Everything, Surprise Six).
+- Tap the star on any song to favorite it (your own custom list), filter the catalog by
+  Faves / Girl Groups / Boy Groups, and sort by group or A to Z.
+- Load a whole playlist in one tap (Add Faves, Add Everything, Surprise Six).
+- Play clipped sections by default, or flip on Full Songs mode to dance the whole track.
 - Play a session: each clip plays with the name hidden, reveals after a guess
   window, counts down, then auto-advances to the next random clip.
 - Everything saves in your browser. Export and import JSON to back up or move it

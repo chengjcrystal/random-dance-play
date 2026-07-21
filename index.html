@@ -32,7 +32,7 @@
     --line: #d8a7b4;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; }
   body {
     color: var(--ink);
     font-family: Manrope, system-ui, sans-serif;
@@ -220,6 +220,9 @@
   .startgate h2 { color: #fff; font-size: 34px; font-style: italic; font-weight: 500; }
   .startgate p { color: rgba(255,224,235,.75); max-width: 400px; font-size: 14px; line-height: 1.6; }
   .startgate button.primary { font-size: 17px; padding: 14px 42px; }
+  .playmode { display: flex; align-items: center; gap: 10px; }
+  .playmode > span { font-family: Fraunces, serif; font-style: italic; color: rgba(255,224,235,.8); font-size: 14px; }
+  .playmode .seg button { color: var(--ink); padding: 9px 16px; }
 
   /* cover the black while a new clip buffers/seeks, lifted once it starts */
   .stage.buffering::after { content: ''; position: absolute; inset: 0; z-index: 5;
@@ -337,7 +340,7 @@
     border: 1.4px solid var(--rose); border-right: 0; border-bottom: 0; }
   .catcard { border-right: 1.4px solid var(--rose); border-bottom: 1.4px solid var(--rose);
     display: flex; align-items: center; gap: 10px; padding: 9px; background: var(--paper); }
-  .catcard img { width: 62px; height: 46px; object-fit: cover; border: 1.4px solid var(--rose); flex: 0 0 auto; background: var(--blush); }
+  .catcard img { display: block; width: 62px; height: 46px; object-fit: cover; border: 1.4px solid var(--rose); background: var(--blush); }
   .catcard .meta { min-width: 0; flex: 1; }
   .catcard .cname { font-family: Fraunces, serif; font-weight: 600; font-size: 13.5px; line-height: 1.16;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -345,7 +348,19 @@
   .catcard .addbtn { flex: 0 0 auto; padding: 7px 11px; font-size: 12px; }
   .catcard .addbtn.added { background: var(--blush); color: var(--rose-deep); border-color: var(--rose); }
   .catcard .addbtn.added:hover { background: var(--red); color: #fff3f5; border-color: var(--red); }
+  .catcard .cthumb { position: relative; flex: 0 0 auto; }
+  .catcard .favbtn { position: absolute; top: -7px; left: -7px; width: 24px; height: 24px; padding: 0;
+    display: grid; place-items: center; background: var(--paper); border: 1.4px solid var(--rose);
+    box-shadow: 0 1px 3px rgba(67,34,47,.25); }
+  .catcard .favbtn .ico { font-size: 13px; color: var(--line); transition: color .12s; }
+  .catcard .favbtn:hover .ico { color: var(--rose); }
+  .catcard .favbtn.on .ico { color: var(--gold); }
   .cat .noresult { padding: 34px 14px; text-align: center; color: var(--muted); font-family: Fraunces, serif; font-style: italic; font-size: 16px; }
+  /* filter tabs + sort row */
+  .catbar { display: flex; align-items: center; gap: 12px; border-bottom: 1.4px solid var(--rose); margin-bottom: 15px; }
+  .catbar .tabs { flex: 1; border-bottom: 0; margin-bottom: 0; }
+  .seg.sortseg { flex: 0 0 auto; }
+  .seg.sortseg button { padding: 7px 11px; font-size: 11px; }
 
   /* ---- tracker: runtime + group diversity ---- */
   .tracker { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin: -6px 2px 20px;
@@ -378,9 +393,28 @@
   @media (max-width: 1400px) { #stickers { display: none; } }
 
   @media (max-width: 540px) {
-    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .grid { grid-template-columns: 1fr 1fr; }
     .catgrid { grid-template-columns: 1fr; }
-    .wrap { padding: 22px 16px 80px; }
+    .wrap { padding: 22px 14px 82px; }
+    /* comfier tap targets on touch */
+    button.small { padding: 9px 12px; }
+    .catcard { padding: 9px; gap: 8px; }
+    .catcard img { width: 54px; height: 40px; }
+    .catcard .addbtn { padding: 9px 12px; }
+    .card .acts { flex-wrap: wrap; }
+    .card .acts button { padding: 9px 6px; }
+    .card .acts .del { padding: 9px 11px; }
+    .playbar .ctrl { width: 54px; height: 46px; }
+    .playbar button { padding: 12px 14px; }
+    /* stack the toolbar cleanly */
+    .toolbar { flex-wrap: wrap; row-gap: 10px; }
+    .toolbar #btn-play { flex: 1 1 100%; }
+    .toolbar .count { order: 3; }
+    /* filter + sort stack */
+    .catbar { flex-wrap: wrap; gap: 8px; }
+    .seg.sortseg { width: 100%; }
+    .settings-fab { top: 4px; right: 14px; }
+    .win, .win .inner { min-width: 0; }
   }
 </style>
 </head>
@@ -456,7 +490,13 @@
         <p class="note">Tap Add on any song and it drops straight into your library with a clip already set. No links to paste. Or load a whole playlist in one tap.</p>
         <div class="searchrow"><svg class="ico"><use href="#i-spark"/></svg><input id="cat-search" placeholder="search songs or groups (try: twice, magnetic, aespa)"></div>
         <div class="shelf" id="cat-shelf"></div>
-        <div class="tabs" id="cat-tabs"></div>
+        <div class="catbar">
+          <div class="tabs" id="cat-tabs"></div>
+          <div class="seg sortseg" id="cat-sort" data-value="group">
+            <button type="button" data-v="group">Group</button>
+            <button type="button" data-v="az">A–Z</button>
+          </div>
+        </div>
         <div class="catgrid" id="cat-grid"></div>
       </div>
     </div>
@@ -548,7 +588,14 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
 
     <div class="startgate" id="startgate">
       <h2>ready to dance?</h2>
-      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each clip plays hidden, then the name is revealed.</p>
+      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each song plays hidden, then the name is revealed.</p>
+      <div class="playmode">
+        <span>play</span>
+        <div class="seg" id="play-mode" data-value="clip">
+          <button type="button" data-v="clip">Clips</button>
+          <button type="button" data-v="full">Full Songs</button>
+        </div>
+      </div>
       <button class="primary" id="btn-start-session">Start</button>
       <button class="link" id="btn-quit-early" style="color:rgba(255,220,232,.8)">back to library</button>
     </div>
@@ -644,7 +691,7 @@ const SONGS_KEY = 'rpd.songs.v1';
 const SETTINGS_KEY = 'rpd.settings.v1';
 const DEFAULT_SETTINGS = {
   guessWindowSec: 5, countdownSec: 3, fallbackClipSec: 30,
-  revealMode: 'afterGuessWindow', includeUnclipped: false,
+  revealMode: 'afterGuessWindow', includeUnclipped: false, fullSong: false,
 };
 const AUTO_CLIP = { start: 45, end: 75 };
 
@@ -1129,9 +1176,15 @@ document.getElementById('btn-play').onclick = () => {
   el.reveal.classList.remove('show');
   el.guessOverlay.style.display = 'none';
   el.nextOverlay.classList.remove('show');
+  setSeg('play-mode', settings.fullSong ? 'full' : 'clip');
   setPauseIcon(false);
   showScreen('play');
 };
+document.querySelectorAll('#play-mode button').forEach(b => b.addEventListener('click', () => {
+  settings.fullSong = b.dataset.v === 'full';
+  setSeg('play-mode', b.dataset.v);
+  saveSettings();
+}));
 
 document.getElementById('btn-start-session').onclick = async () => {
   el.startgate.classList.add('hide');
@@ -1147,7 +1200,8 @@ document.getElementById('btn-start-session').onclick = async () => {
 };
 
 function computeBounds(s) {
-  if (hasClip(s)) { effStart = s.startSec; effEnd = s.endSec; }
+  if (settings.fullSong) { effStart = 0; effEnd = Infinity; }
+  else if (hasClip(s)) { effStart = s.startSec; effEnd = s.endSec; }
   else { effStart = isFiniteNum(s.startSec) ? s.startSec : 0; effEnd = effStart + settings.fallbackClipSec; }
 }
 function loadCurrentClip() {
@@ -1163,7 +1217,8 @@ function loadCurrentClip() {
   el.guessOverlay.style.display = 'flex';
   el.guessPill.firstChild.textContent = settings.revealMode === 'hidden' ? 'dance!' : 'guess?';
   updateStatus();
-  player.loadVideoById({ videoId: s.youtubeId, startSeconds: effStart, endSeconds: effEnd });
+  if (settings.fullSong) player.loadVideoById({ videoId: s.youtubeId, startSeconds: 0 });
+  else player.loadVideoById({ videoId: s.youtubeId, startSeconds: effStart, endSeconds: effEnd });
   startCcBurst();
 }
 function updateStatus() {
@@ -1216,7 +1271,7 @@ function playTick() {
       if (performance.now() - clipLoadAt > 7000) { flashError(); advance(); return; }
       if (phase === 'guessing' && settings.revealMode === 'afterGuessWindow')
         el.guessSub.textContent = 'reveal in ' + settings.guessWindowSec;
-      el.clock.textContent = 'clip ' + fmt(effEnd - effStart) + ' left';
+      el.clock.textContent = isFinite(effEnd) ? 'clip ' + fmt(effEnd - effStart) + ' left' : 'full song';
       return;
     }
   }
@@ -1230,7 +1285,7 @@ function playTick() {
       if (elapsed >= settings.guessWindowSec) reveal();
     } else el.guessSub.textContent = '';
   }
-  el.clock.textContent = 'clip ' + fmt(Math.max(0, effEnd - t)) + ' left';
+  el.clock.textContent = isFinite(effEnd) ? 'clip ' + fmt(Math.max(0, effEnd - t)) + ' left' : 'full song';
 }
 function reveal() {
   if (phase !== 'guessing') return;
@@ -1451,22 +1506,30 @@ const CATALOG = [
   { name: 'LE SSERAFIM x ILLIT x KATSEYE - Iconic by Mistake', group: 'LE SSERAFIM x ILLIT x KATSEYE', youtubeId: '2rA2K0gwjoo', startSec: 40, endSec: 68 },
 ];
 
+/* favorites: your own customizable list of songs (star any song). replaces the old
+   hardcoded fav-groups so it still works when your taste changes. */
+const FAVS_KEY = 'rpd.favs.v1';
+let favs = new Set((() => { try { return JSON.parse(localStorage.getItem(FAVS_KEY) || '[]'); } catch { return []; } })());
+function saveFavs() { localStorage.setItem(FAVS_KEY, JSON.stringify([...favs])); }
+function toggleFav(id) { if (favs.has(id)) favs.delete(id); else favs.add(id); saveFavs(); }
+
 const PLAYLISTS = [
-  { key: 'bias',     label: 'My Fav Groups',  ico: 'i-spark', pick: c => ['TWICE', 'ILLIT', 'LE SSERAFIM'].includes(c.group) },
-  { key: 'all',      label: 'Add Everything', ico: 'i-star',  pick: () => true },
-  { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   pick: null },
+  { key: 'fav',      label: 'Add Faves',      ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
+  { key: 'all',      label: 'Add Everything', ico: 'i-spark', cats: () => CATALOG.slice() },
+  { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   cats: null },
 ];
 
-/* only boy groups are listed here; everything else in the catalog is a girl group or female soloist */
+/* only boy groups are listed here; everything else is a girl group or female soloist */
 const BOY_GROUPS = new Set(['TWS', 'ENHYPEN', 'BOYNEXTDOOR']);
 function genderOf(group) { return BOY_GROUPS.has(group) ? 'boy' : 'girl'; }
 const CAT_TABS = [
   { key: 'all',  label: 'All' },
+  { key: 'fav',  label: '★ Faves' },
   { key: 'girl', label: 'Girl Groups' },
   { key: 'boy',  label: 'Boy Groups' },
 ];
 
-let catSearch = '', catFilter = 'all';
+let catSearch = '', catFilter = 'all', catSort = 'group';
 
 function inLibrary(id) { return songs.some(s => s.youtubeId === id); }
 
@@ -1482,9 +1545,12 @@ function buildCatTabs() {
   }
 }
 let surpriseIds = [];
+function playlistCats(pl) {
+  if (pl.key === 'surprise') return surpriseIds.map(id => CATALOG.find(c => c.youtubeId === id)).filter(Boolean);
+  return pl.cats();
+}
 function playlistActive(pl) {
-  const cats = pl.pick ? CATALOG.filter(pl.pick)
-    : surpriseIds.map(id => CATALOG.find(c => c.youtubeId === id)).filter(Boolean);
+  const cats = playlistCats(pl);
   return cats.length > 0 && cats.every(c => inLibrary(c.youtubeId));
 }
 function renderShelf() {
@@ -1493,7 +1559,7 @@ function renderShelf() {
   wrap.innerHTML = '';
   for (const pl of PLAYLISTS) {
     const active = playlistActive(pl);
-    const count = pl.pick ? CATALOG.filter(pl.pick).length : 6;
+    const count = pl.key === 'surprise' ? 6 : pl.cats().length;
     const b = document.createElement('button');
     b.className = 'small plbtn' + (active ? ' active' : '');
     if (active) b.title = 'click again to remove these';
@@ -1512,25 +1578,38 @@ function renderCatalog() {
   const grid = document.getElementById('cat-grid');
   if (!grid) return;
   const q = catSearch.trim().toLowerCase();
-  let list = CATALOG.filter(c => catFilter === 'all' || genderOf(c.group) === catFilter);
+  let list = CATALOG.filter(c => {
+    if (catFilter === 'fav') return favs.has(c.youtubeId);
+    if (catFilter === 'girl' || catFilter === 'boy') return genderOf(c.group) === catFilter;
+    return true;
+  });
   if (q) list = list.filter(c => (c.name + ' ' + c.group).toLowerCase().includes(q));
+  if (catSort === 'az') list = list.slice().sort((a, b) =>
+    a.name.replace(a.group + ' - ', '').localeCompare(b.name.replace(b.group + ' - ', '')));
   document.querySelectorAll('#cat-tabs button').forEach(b => {
     const t = CAT_TABS.find(x => x.label === b.textContent);
     b.classList.toggle('active', !!t && t.key === catFilter);
   });
   grid.innerHTML = '';
   if (CATALOG.length === 0) { grid.innerHTML = '<div class="noresult">catalog loading...</div>'; return; }
-  if (list.length === 0) { grid.innerHTML = '<div class="noresult">no matches, try another search</div>'; return; }
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="noresult">' +
+      (catFilter === 'fav' ? 'no faves yet, tap the star on songs you love' : 'no matches, try another search') + '</div>';
+    return;
+  }
   for (const c of list) {
     const added = inLibrary(c.youtubeId);
+    const fav = favs.has(c.youtubeId);
     const card = document.createElement('div');
     card.className = 'catcard';
     card.innerHTML =
-      '<img loading="lazy" src="' + thumb(c.youtubeId) + '" alt="">' +
+      '<div class="cthumb"><img loading="lazy" src="' + thumb(c.youtubeId) + '" alt="">' +
+        '<button class="favbtn' + (fav ? ' on' : '') + '" title="favorite" aria-label="favorite"><svg class="ico"><use href="#i-star"/></svg></button></div>' +
       '<div class="meta"><div class="cname"></div><div class="cgrp"></div></div>' +
       '<button class="small addbtn' + (added ? ' added' : '') + '">' + (added ? 'Added' : 'Add') + '</button>';
     card.querySelector('.cname').textContent = c.name.replace(c.group + ' - ', '');
     card.querySelector('.cgrp').textContent = c.group;
+    card.querySelector('.favbtn').onclick = () => { toggleFav(c.youtubeId); renderCatalog(); renderShelf(); };
     const btn = card.querySelector('.addbtn');
     if (added) {
       btn.title = 'click to remove from library';
@@ -1575,7 +1654,8 @@ function togglePlaylist(pl) {
     }
     return;
   }
-  const cats = CATALOG.filter(pl.pick);
+  const cats = pl.cats();
+  if (cats.length === 0) { toast(pl.key === 'fav' ? 'Tap the star on songs to build your faves.' : 'Nothing to add.'); return; }
   if (cats.every(c => inLibrary(c.youtubeId))) {
     const drop = new Set(cats.map(c => c.youtubeId));
     songs = songs.filter(s => !drop.has(s.youtubeId));
@@ -1605,9 +1685,13 @@ function renderTracker() {
 }
 
 document.getElementById('cat-search').addEventListener('input', e => { catSearch = e.target.value; renderCatalog(); });
+document.querySelectorAll('#cat-sort button').forEach(b => b.addEventListener('click', () => {
+  catSort = b.dataset.v; setSeg('cat-sort', b.dataset.v); renderCatalog();
+}));
 
 renderShelf();
 buildCatTabs();
+setSeg('cat-sort', 'group');
 
 buildPhotocards();
 renderCatalog();
