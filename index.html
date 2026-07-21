@@ -219,6 +219,17 @@
   .startgate p { color: rgba(255,224,235,.75); max-width: 400px; font-size: 14px; line-height: 1.6; }
   .startgate button.primary { font-size: 17px; padding: 14px 42px; }
 
+  /* cover the black while a new clip buffers/seeks, lifted once it starts */
+  .stage.buffering::after { content: ''; position: absolute; inset: 0; z-index: 5;
+    background: radial-gradient(circle at 50% 40%, #4a1626, #220d16 70%); }
+
+  /* finish screen recap */
+  .finish-list { width: 100%; max-width: 420px; max-height: 34vh; overflow-y: auto;
+    border: 1.4px solid var(--rose); background: rgba(34,13,22,.4); text-align: left; }
+  .finish-list .fitem { padding: 7px 14px; color: #fff2f6; font-size: 13.5px;
+    border-bottom: 1px solid rgba(229,138,173,.25); }
+  .finish-list .fitem:last-child { border-bottom: 0; }
+
   /* ---- modal ---- */
   .backdrop { position: fixed; inset: 0; background: rgba(34,13,22,.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 40; }
   .backdrop.open { display: flex; }
@@ -550,12 +561,19 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
       <button class="primary" id="btn-start-session">Start</button>
       <button class="link" id="btn-quit-early" style="color:rgba(255,220,232,.8)">back to library</button>
     </div>
+
+    <div class="startgate hide" id="finishgate">
+      <h2>that's a wrap!</h2>
+      <p id="finish-recap"></p>
+      <div class="finish-list" id="finish-list"></div>
+      <button class="primary" id="btn-play-again">Play Again</button>
+      <button class="link" id="btn-finish-back" style="color:rgba(255,220,232,.8)">back to library</button>
+    </div>
   </div>
 
   <div class="playbar">
     <div class="status">
       <span class="pos" id="play-pos">0 / 0</span>
-      <span class="rnd" id="play-round">round 1</span>
       <span class="clock" id="play-clock"></span>
     </div>
     <button class="small" id="btn-replay">Replay</button>
@@ -828,8 +846,7 @@ function songCard(s, i) {
   else { dot = 'none'; statusText = 'no clip set'; }
   el.innerHTML =
     '<div class="thumbwrap"><img loading="lazy" src="' + thumb(s.youtubeId) + '" alt="">' +
-      '<span class="idx">' + String(i + 1).padStart(2, '0') + '</span>' +
-      '<svg class="ico bow"><use href="#i-star"/></svg></div>' +
+      '<span class="idx">' + String(i + 1).padStart(2, '0') + '</span></div>' +
     '<div class="body">' +
       '<div class="name"></div>' +
       '<div class="status"><i class="dot ' + dot + '"></i><span></span></div>' +
@@ -1061,7 +1078,7 @@ function leaveEditor() {
 }
 
 /* ================= PLAY SESSION ================= */
-let queue = [], queueIndex = 0, round = 1, lastRoundLastId = null;
+let queue = [], queueIndex = 0;
 let phase = 'idle', isPaused = false;
 let playPoll = null, nextTimer = null, clipEnding = false, lastSkipAt = 0;
 let effStart = 0, effEnd = 0, clipStarted = false, clipLoadAt = 0;
@@ -1078,9 +1095,9 @@ const el = {
   nextUp: document.getElementById('next-up'),
   errflash: document.getElementById('errflash'),
   pos: document.getElementById('play-pos'),
-  round: document.getElementById('play-round'),
   clock: document.getElementById('play-clock'),
   pauseBtn: document.getElementById('btn-pause'),
+  stage: document.getElementById('stage'),
 };
 
 function currentSong() { return songs.find(s => s.id === queue[queueIndex]); }
@@ -1090,20 +1107,16 @@ function shuffle(arr) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
-function buildRound() {
-  let q = shuffle(eligibleSongs().map(s => s.id));
-  if (q.length > 1 && lastRoundLastId && q[0] === lastRoundLastId) {
-    const swap = 1 + Math.floor(Math.random() * (q.length - 1));
-    [q[0], q[swap]] = [q[swap], q[0]];
-  }
-  queue = q; queueIndex = 0;
+function buildQueue() {
+  queue = shuffle(eligibleSongs().map(s => s.id));
+  queueIndex = 0;
 }
 
 document.getElementById('btn-play').onclick = () => {
   if (eligibleSongs().length === 0) { toast('Add at least one song with a clip.'); return; }
-  round = 1; lastRoundLastId = null;
-  buildRound();
+  buildQueue();
   phase = 'idle'; isPaused = false;
+  document.getElementById('finishgate').classList.add('hide');
   el.startgate.classList.remove('hide');
   el.reveal.classList.remove('show');
   el.guessOverlay.style.display = 'none';
@@ -1134,6 +1147,7 @@ function loadCurrentClip() {
   if (!s) { endSession(); return; }
   computeBounds(s);
   clipEnding = false; clipStarted = false; clipLoadAt = performance.now(); phase = 'guessing'; isPaused = false;
+  el.stage.classList.add('buffering');
   el.pauseBtn.textContent = 'Pause';
   el.reveal.classList.remove('show');
   el.revealName.textContent = s.name || '(untitled)';
@@ -1142,17 +1156,23 @@ function loadCurrentClip() {
   el.guessPill.firstChild.textContent = settings.revealMode === 'hidden' ? 'dance!' : 'guess?';
   updateStatus();
   player.loadVideoById({ videoId: s.youtubeId, startSeconds: effStart, endSeconds: effEnd });
-  killCaptions(); setTimeout(killCaptions, 300); setTimeout(killCaptions, 900);
+  startCcBurst();
 }
 function updateStatus() {
   el.pos.textContent = (queueIndex + 1) + ' / ' + queue.length;
-  el.round.textContent = 'round ' + round;
 }
 
+let ccBurst = null;
 function killCaptions() {
   if (!player) return;
   try { player.unloadModule('captions'); } catch {}
   try { player.unloadModule('cc'); } catch {}
+}
+function startCcBurst() {
+  clearInterval(ccBurst);
+  killCaptions();
+  let n = 0;
+  ccBurst = setInterval(() => { killCaptions(); if (++n >= 20) { clearInterval(ccBurst); ccBurst = null; } }, 100);
 }
 function onPlayState(e) {
   if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) killCaptions();
@@ -1183,6 +1203,7 @@ function playTick() {
   if (!clipStarted) {
     if (t >= effStart - 0.5 && t < effEnd) {
       clipStarted = true;
+      el.stage.classList.remove('buffering');
     } else {
       if (performance.now() - clipLoadAt > 7000) { flashError(); advance(); return; }
       if (phase === 'guessing' && settings.revealMode === 'afterGuessWindow')
@@ -1237,10 +1258,32 @@ function clearNextTimer() { if (nextTimer) { clearInterval(nextTimer); nextTimer
 function advance() {
   clearNextTimer();
   el.nextOverlay.classList.remove('show');
-  const finishedId = queue[queueIndex];
   queueIndex += 1;
-  if (queueIndex >= queue.length) { lastRoundLastId = finishedId; round += 1; buildRound(); }
+  if (queueIndex >= queue.length) { finishSession(); return; }
   loadCurrentClip();
+}
+function finishSession() {
+  stopPlayPoll(); clearNextTimer();
+  clearInterval(ccBurst); ccBurst = null;
+  if (player && player.stopVideo) { try { player.stopVideo(); } catch {} }
+  phase = 'idle'; isPaused = false;
+  el.stage.classList.remove('buffering');
+  el.reveal.classList.remove('show');
+  el.guessOverlay.style.display = 'none';
+  el.nextOverlay.classList.remove('show');
+  el.clock.textContent = '';
+  const names = queue.map(id => { const s = songs.find(x => x.id === id); return s ? (s.name || '(untitled)') : null; }).filter(Boolean);
+  document.getElementById('finish-recap').textContent =
+    'you danced through all ' + names.length + ' song' + (names.length === 1 ? '' : 's') + '. nice.';
+  const list = document.getElementById('finish-list');
+  list.innerHTML = '';
+  names.forEach((n, i) => {
+    const d = document.createElement('div');
+    d.className = 'fitem';
+    d.textContent = (i + 1) + '.  ' + n;
+    list.appendChild(d);
+  });
+  document.getElementById('finishgate').classList.remove('hide');
 }
 
 document.getElementById('btn-skip').onclick = () => {
@@ -1272,9 +1315,18 @@ document.getElementById('btn-pause').onclick = () => {
 };
 document.getElementById('btn-quit').onclick = endSession;
 document.getElementById('btn-quit-early').onclick = endSession;
-function endSession() {
-  stopPlayPoll(); clearNextTimer(); destroyPlayer();
+document.getElementById('btn-finish-back').onclick = endSession;
+document.getElementById('btn-play-again').onclick = () => {
+  document.getElementById('finishgate').classList.add('hide');
+  buildQueue();
   phase = 'idle'; isPaused = false;
+  startPlayPoll();
+  loadCurrentClip();
+};
+function endSession() {
+  stopPlayPoll(); clearNextTimer(); clearInterval(ccBurst); ccBurst = null; destroyPlayer();
+  phase = 'idle'; isPaused = false;
+  document.getElementById('finishgate').classList.add('hide');
   showScreen('library'); renderLibrary();
 }
 
