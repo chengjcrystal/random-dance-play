@@ -230,6 +230,12 @@
     border-bottom: 1px solid rgba(229,138,173,.25); }
   .finish-list .fitem:last-child { border-bottom: 0; }
 
+  /* top-right exit button on the play screen */
+  .play-exit { position: absolute; top: 12px; right: 12px; z-index: 12; width: 40px; height: 40px; padding: 0;
+    display: grid; place-items: center; font-size: 17px; line-height: 1; color: #fff5f8;
+    background: rgba(34,13,22,.55); border: 1.4px solid var(--rose); }
+  .play-exit:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
+
   /* ---- modal ---- */
   .backdrop { position: fixed; inset: 0; background: rgba(34,13,22,.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 40; }
   .backdrop.open { display: flex; }
@@ -535,6 +541,7 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
 
 <!-- ================= PLAY SESSION ================= -->
 <div id="play-screen" class="screen">
+  <button id="btn-exit" class="play-exit" title="end session (Esc)">&#10005;</button>
   <div class="stage" id="stage">
     <div id="play-player-wrap" style="position:absolute;inset:0;"><div class="ytplayer"></div></div>
     <div id="title-mask"></div>
@@ -1316,6 +1323,7 @@ document.getElementById('btn-pause').onclick = () => {
 document.getElementById('btn-quit').onclick = endSession;
 document.getElementById('btn-quit-early').onclick = endSession;
 document.getElementById('btn-finish-back').onclick = endSession;
+document.getElementById('btn-exit').onclick = endSession;
 document.getElementById('btn-play-again').onclick = () => {
   document.getElementById('finishgate').classList.add('hide');
   buildQueue();
