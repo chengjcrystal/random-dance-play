@@ -1,28 +1,48 @@
-<p align="center">
-  <img src="assets/screenshot.png" alt="Random Dance Play home screen: a rose-colored setlist and K-pop catalog" width="820">
-</p>
-
 # ⋆˚✩ random dance play ✩˚⋆
 
 a little web app for random play dance. it shuffles clips of official k-pop dance-practice videos (no lyrics, so you can actually dance along), hides the song name for a few seconds so you can guess, then reveals it and moves on to the next one. fun solo or with a group, and it casts to a tv by casting the browser tab.
 
 no accounts, no backend, no build step, nothing to download. playback runs through the official youtube iframe player api and your library lives in the browser. a weekend-project kind of thing, built because it sounded fun.
 
-♫ run it and open [localhost:8000](http://localhost:8000) (see [run it](#-run-it) below)
-
 ˗ˏˋ ꒰ ♡ ꒱ ˎˊ˗
 
 ## ♫ what it does
+
+<p align="center">
+  <img src="assets/shot-browse.png" alt="The browse catalog window: a retro browse_catalog.exe title bar, a search box, playlist buttons, and a grid of K-pop dance-practice songs each with add, star, and check buttons" width="720">
+  <br><em>browse the catalog, one-tap add, star a fave or check off what you know</em>
+</p>
 
 - your setlist and the play button sit up top; the browse catalog is right below.
 - browse a built-in catalog of k-pop songs (twice, illit, le sserafim, newjeans, aespa, ive, and more) and one-tap add. each song comes with a clip already set, so you can play right away with nothing to type. added songs float to the top of the catalog.
 - or paste any youtube link for songs that aren't in the catalog.
 - two per-song marks: tap the star to favorite a song, or the check to mark it full song known (you know it start to finish). filter the catalog by faves / full song known / girl / boy groups and sort by group or a–z.
-- marking a song full song known doesn't change how it plays on its own. it unlocks a chorus / full song toggle on that song in your setlist, defaulting to the short clip, so you decide which known songs actually play their whole track.
 - load a whole playlist in one tap (add faves, full song, add everything, surprise six). adding or removing doesn't jump your scroll: the catalog stays put.
-- in a session, everything plays a short guess-clip unless you flipped a known song to full song. no global toggle to remember.
-- play a session: each song plays with the name hidden, reveals after a guess window, counts down, then auto-advances to the next random one. the order reshuffles on every session and every play again, and avoids repeating the previous run's order.
 - everything saves in your browser. export and import json to back up or move between devices.
+
+## ♡ know it? your call
+
+marking a song full song known doesn't change how it plays on its own. it unlocks a chorus / full song toggle on that song in your setlist, defaulting to the short clip, so you decide which known songs actually play their whole track. everything else stays a quick guess-clip, no global toggle to remember.
+
+<p align="center">
+  <img src="assets/shot-setlist.png" alt="A setlist song card for TWICE - Fancy showing the clip time range, a plays Chorus/Full segmented toggle set to Chorus, and Set Clip, Edit, and delete buttons" width="300">
+  <br><em>known songs unlock a chorus / full toggle, defaulting to the short clip</em>
+</p>
+
+## ⟡ how to play
+
+<p align="center">
+  <img src="assets/shot-play.png" alt="The play screen mid-session: a TWICE dance-practice video with the song name TWICE - What is Love? revealed across the bottom" width="720">
+  <br><em>guess during the clip, then the name drops</em>
+</p>
+
+1. add songs from the catalog, or paste links in the second panel.
+2. optional: tap set clip to scrub to the exact dance section you want.
+3. tap play session, then start once to unlock audio.
+
+each song plays with the name hidden, reveals after a guess window, counts down, then auto-advances to the next random one. the order reshuffles on every session and every play again, and avoids repeating the previous run's order.
+
+during a session: replay, pause (freezes every timer), skip, and the ✕ in the top corner to exit. keyboard: space pauses, right arrow or n skips, r replays, esc exits.
 
 ## ✎ run it
 
@@ -34,14 +54,6 @@ python3 -m http.server 8000
 
 then open [http://localhost:8000](http://localhost:8000). it works on any static host too. opening the file directly with `file://` can make the player flaky, so prefer a local server.
 
-## ⟡ how to play
-
-1. add songs from the catalog, or paste links in the second panel.
-2. optional: tap set clip to scrub to the exact dance section you want.
-3. tap play session, then start once to unlock audio.
-
-during a session: replay, pause (freezes every timer), skip, and the ✕ in the top corner to exit. keyboard: space pauses, right arrow or n skips, r replays, esc exits.
-
 ## ✩ settings
 
 - **guess window** (default 5s): how long the name stays hidden.
@@ -49,7 +61,7 @@ during a session: replay, pause (freezes every timer), skip, and the ✕ in the 
 - **reveal mode**: after the guess window, immediate, or hidden.
 - **include un-clipped songs** and a **fallback clip length** for songs without a set clip.
 
-## ♡ the fun parts
+## ♫ the fun parts
 
 no framework, no build step, no dependencies: one `index.html` with inline css and vanilla js. a few bits i enjoyed figuring out:
 
