@@ -1,6 +1,6 @@
 # Random Dance Play
 
-A little web app for random play dance (RPD): it shuffles clips of mirrored K-pop
+A little web app for random play dance (RPD): it shuffles clips of official K-pop
 dance-practice videos (no lyrics, so you can actually dance along), hides the song
 name for a few seconds so you can guess, then reveals it and moves to the next one.
 Fun for solo or group play, and it casts to a TV by casting the browser tab.
@@ -13,16 +13,20 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
 
 ## What It Does
 
+- Your setlist and the Play button sit up top; the browse catalog is right below it.
 - Browse a built-in catalog of K-pop songs (TWICE, ILLIT, LE SSERAFIM, NewJeans,
   aespa, IVE, and more) and one-tap add. Each song comes with a clip already set,
-  so you can play right away with nothing to type.
+  so you can play right away with nothing to type. Added songs float to the top of
+  the catalog.
 - Or paste any YouTube link for songs that aren't in the catalog.
-- Tap the star on any song to favorite it (your own custom list), filter the catalog by
-  Faves / Girl Groups / Boy Groups, and sort by group or A to Z.
-- Load a whole playlist in one tap (Add Faves, Add Everything, Surprise Six).
-- Play clipped sections by default, or flip on Full Songs mode to dance the whole track.
-- Play a session: each clip plays with the name hidden, reveals after a guess
-  window, counts down, then auto-advances to the next random clip.
+- Two per-song marks: tap the star to favorite a song, or the check to mark one you
+  know start to finish. Filter the catalog by Faves / Known / Girl / Boy groups and
+  sort by group or A to Z.
+- Load a whole playlist in one tap (Add Faves, Add Known, Add Everything, Surprise Six).
+- In a session, songs you marked known play their full track; everything else plays a
+  short guess-clip. No global toggle to remember.
+- Play a session: each song plays with the name hidden, reveals after a guess
+  window, counts down, then auto-advances to the next random one.
 - Everything saves in your browser. Export and import JSON to back up or move it
   between devices.
 
@@ -43,8 +47,8 @@ file directly with `file://` can make the player flaky, so prefer a local server
 2. Optional: tap Set Clip to scrub to the exact dance section you want.
 3. Tap Play Session, then Start once to unlock audio.
 
-During a session: Replay, Pause (freezes every timer), Skip, End. Keyboard: space
-pauses, right arrow or N skips, R replays, Esc ends.
+During a session: Replay, Pause (freezes every timer), Skip, and the ✕ in the top
+corner to exit. Keyboard: space pauses, right arrow or N skips, R replays, Esc exits.
 
 ## Settings
 
@@ -61,8 +65,8 @@ vanilla JS. A few parts I enjoyed figuring out:
 - Playback is a poll-driven state machine over the YouTube IFrame API. Reveal timing
   and clip end are measured off `getCurrentTime()`, so pausing the video freezes every
   timer for free (paused time simply doesn't advance).
-- Fisher-Yates shuffle with play-all-before-repeat rounds, and it avoids starting a
-  round on the same song the previous one ended with.
+- Fisher-Yates shuffle over a play-once queue: it plays every song in the setlist
+  once, then lands on a finish-screen recap instead of looping forever.
 - The catalog is searched and filtered client-side; one tap adds a song with its clip
   already set, and playlist buttons batch-add.
 - Song titles come from YouTube oEmbed (no API key), and removed or region-blocked
