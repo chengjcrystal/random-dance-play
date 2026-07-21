@@ -24,6 +24,8 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
   Known / Girl / Boy groups and sort by group or A to Z.
 - Load a whole playlist in one tap (Add Faves, Add Full Song Known, Add Everything,
   Surprise Six). Adding or removing doesn't jump your scroll: the catalog stays put.
+- A "you might know these" row surfaces songs from groups you've already picked (padded
+  with popular hits). It's a small honest heuristic, not a recommender model.
 - In a session, songs you marked Full Song Known play their full track; everything else
   plays a short guess-clip. No global toggle to remember.
 - Play a session: each song plays with the name hidden, reveals after a guess
