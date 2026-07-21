@@ -44,8 +44,6 @@
     background-attachment: fixed;
   }
   h1, h2, h3 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; }
-  .serif { font-family: Fraunces, Georgia, serif; }
-  .ital { font-family: Fraunces, Georgia, serif; font-style: italic; }
 
   .ico { width: 1em; height: 1em; fill: currentColor; display: inline-block; vertical-align: -.12em; }
 
@@ -199,7 +197,6 @@
   .reveal.show { transform: translateY(0); opacity: 1; }
   .reveal .songname { font-family: Fraunces, serif; font-weight: 600; color: #fff; font-size: clamp(24px, 5vw, 52px);
     text-shadow: 0 2px 20px rgba(192,31,60,.6); }
-  .reveal .songname .ico { color: var(--rose); font-size: .7em; vertical-align: .04em; margin-left: .2em; }
 
   .next-overlay { position: absolute; inset: 0; z-index: 7; display: none; align-items: center; justify-content: center;
     flex-direction: column; background: rgba(34,13,22,.92); text-align: center; }
@@ -264,7 +261,6 @@
   .runbox { margin-top: 30px; }
   .runbox .inner { padding: 16px; }
   .runbox .note { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin: 0; }
-  code { font-family: ui-monospace, monospace; background: var(--blush-soft); border: 1px solid var(--rose); padding: 1px 6px; font-size: 12px; }
 
   /* ---- k-pop y2k layer ---- */
   .marquee { overflow: hidden; white-space: nowrap; border-bottom: 1.4px solid var(--chrome-deep);
@@ -833,8 +829,7 @@ window.onYouTubeIframeAPIReady = () => ytReadyResolve();
 })();
 
 let player = null;
-let playerMode = null;
-function destroyPlayer() { if (player) { try { player.destroy(); } catch {} player = null; } playerMode = null; }
+function destroyPlayer() { if (player) { try { player.destroy(); } catch {} player = null; } }
 function freshTarget(wrapId) {
   const wrap = document.getElementById(wrapId);
   wrap.innerHTML = '<div class="ytplayer"></div>';
@@ -953,7 +948,7 @@ document.getElementById('btn-add').onclick = async () => {
   const text = ta.value;
   const entries = parseBulk(text);
   if (entries.length === 0) {
-    if (/spotify/i.test(text)) toast('Spotify links can not be read. Paste YouTube links instead.');
+    if (/spotify/i.test(text)) toast('Spotify links cannot be read. Paste YouTube links instead.');
     else toast('No YouTube links found. Paste a link or id per line.');
     return;
   }
@@ -1225,7 +1220,6 @@ document.getElementById('btn-start-session').onclick = async () => {
     onStateChange: onPlayState,
     onError: onPlayError,
   });
-  playerMode = 'play';
   startPlayPoll();
   loadCurrentClip();
 };
@@ -1566,10 +1560,10 @@ function togglePlayFull(id) { if (playFull.has(id)) playFull.delete(id); else pl
 function isFull(s) { return !!(s && known.has(s.youtubeId) && playFull.has(s.youtubeId)); }
 
 const PLAYLISTS = [
-  { key: 'fav',      label: 'Add Faves',      ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
-  { key: 'known',    label: 'Full Song', ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
-  { key: 'all',      label: 'Add Everything', ico: 'i-spark', cats: () => CATALOG.slice() },
-  { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   cats: null },
+  { key: 'fav',      label: 'Add Faves',      noun: 'fave',       ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
+  { key: 'known',    label: 'Full Song',      noun: 'known song', ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
+  { key: 'all',      label: 'Add Everything', noun: 'song',       ico: 'i-spark', cats: () => CATALOG.slice() },
+  { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',       cats: null },
 ];
 
 /* only boy groups are listed here; everything else is a girl group or female soloist */
@@ -1741,12 +1735,12 @@ function togglePlaylist(pl) {
     const drop = new Set(cats.map(c => c.youtubeId));
     songs = songs.filter(s => !drop.has(s.youtubeId));
     saveSongs(); anchoredRender();
-    toast('Removed ' + cats.length + ' ' + pl.label.replace(/^Add /, '') + '.');
+    toast('Removed ' + cats.length + ' ' + pl.noun + (cats.length === 1 ? '' : 's') + '.');
   } else {
     let n = 0;
     for (const c of cats) if (!inLibrary(c.youtubeId)) { songs.push(catToSong(c)); n++; }
     saveSongs(); anchoredRender();
-    toast('Added ' + n + ' ' + pl.label.replace(/^Add /, '') + '.');
+    toast('Added ' + n + ' ' + pl.noun + (n === 1 ? '' : 's') + '.');
   }
 }
 
