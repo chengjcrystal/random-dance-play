@@ -366,14 +366,6 @@
   /* empty catalog state: no bordered grid so it isn't a half-drawn box */
   .catgrid.is-empty { border: 0; }
   .cat .noresult { grid-column: 1 / -1; padding: 34px 14px; text-align: center; color: var(--muted); font-family: Fraunces, serif; font-style: italic; font-size: 16px; }
-  /* recommended row: honest heuristic (groups you already picked, padded with hits) */
-  .recs { margin-bottom: 16px; }
-  .recs .recs-head { font-family: Fraunces, serif; font-style: italic; color: var(--rose-deep);
-    font-size: 15px; margin-bottom: 9px; display: flex; align-items: center; gap: 7px; }
-  .recs .recs-head .ico { color: var(--gold); font-size: 14px; }
-  .recs .recs-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(208px, 1fr);
-    gap: 10px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; }
-  .recs .recs-row .catcard { scroll-snap-align: start; border: 1.4px solid var(--rose); }
   /* filter tabs + sort row */
   .catbar { display: flex; align-items: center; gap: 12px; border-bottom: 1.4px solid var(--rose); margin-bottom: 15px; }
   .catbar .tabs { flex: 1; border-bottom: 0; margin-bottom: 0; }
@@ -516,8 +508,6 @@
       <button class="small" id="btn-import"><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-folder"/></svg>Import</button>
       <input type="file" id="import-file" accept="application/json,.json" hidden>
     </div>
-
-    <div class="recs" id="cat-recs" hidden></div>
 
     <div class="tracker" id="tracker"></div>
 
@@ -1538,7 +1528,7 @@ function isFull(s) { return s && known.has(s.youtubeId); }
 
 const PLAYLISTS = [
   { key: 'fav',      label: 'Add Faves',      ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
-  { key: 'known',    label: 'Add Full Song Known', ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
+  { key: 'known',    label: 'Full Song', ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
   { key: 'all',      label: 'Add Everything', ico: 'i-spark', cats: () => CATALOG.slice() },
   { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   cats: null },
 ];
@@ -1602,7 +1592,6 @@ function catToSong(c) {
 function renderCatalog() {
   const grid = document.getElementById('cat-grid');
   if (!grid) return;
-  renderRecs();
   const q = catSearch.trim().toLowerCase();
   let list = CATALOG.filter(c => {
     if (catFilter === 'fav') return favs.has(c.youtubeId);
@@ -1660,39 +1649,6 @@ function catCardEl(c) {
   return card;
 }
 
-/* recommendations: not ML, just an honest heuristic. Surface songs NOT in your setlist
-   yet, from groups you already added/starred, padded out with well-known hits. Lives up
-   by the setlist as a quick-add, not inside the catalog. */
-const POPULAR_IDS = ['9uypQGzzhns', '6KIuzXYR16Y', '4hAdcenQWqU', 'wU2siJ2c5TA', 'pKCaXYYwGjw', '8x43gsnkBH8'];
-function recommendedCats() {
-  const inLib = new Set(songs.map(s => s.youtubeId));
-  const engaged = new Set();
-  for (const s of songs) if (s.group) engaged.add(s.group);
-  for (const c of CATALOG) if (favs.has(c.youtubeId) || known.has(c.youtubeId)) engaged.add(c.group);
-  const recs = engaged.size ? CATALOG.filter(c => engaged.has(c.group) && !inLib.has(c.youtubeId)) : [];
-  if (recs.length < 6) {
-    const have = new Set(recs.map(c => c.youtubeId));
-    for (const id of POPULAR_IDS) {
-      if (recs.length >= 6) break;
-      const c = CATALOG.find(x => x.youtubeId === id);
-      if (c && !inLib.has(id) && !have.has(id)) { recs.push(c); have.add(id); }
-    }
-  }
-  return recs.slice(0, 6);
-}
-function renderRecs() {
-  const box = document.getElementById('cat-recs');
-  if (!box) return;
-  const recs = recommendedCats();
-  if (recs.length === 0) { box.hidden = true; box.innerHTML = ''; return; }
-  const engaged = songs.some(s => s.group) || favs.size || known.size;
-  box.hidden = false;
-  box.innerHTML = '<div class="recs-head"><svg class="ico"><use href="#i-spark"/></svg>' +
-    (engaged ? 'you might know these' : 'popular to start with') + '</div><div class="recs-row"></div>';
-  const row = box.querySelector('.recs-row');
-  for (const c of recs) row.appendChild(catCardEl(c));
-}
-
 /* Adding/removing changes the setlist height, which sits above the catalog. Re-render,
    then scroll by however much the catalog shifted so it stays put under your cursor. */
 function anchoredRender() {
@@ -1716,7 +1672,6 @@ function removeFromCatalog(c) {
   songs = songs.filter(s => s.youtubeId !== c.youtubeId);
   if (songs.length === before) return;
   saveSongs(); anchoredRender();
-  toast('Removed ' + c.name.replace(c.group + ' - ', ''));
 }
 function togglePlaylist(pl) {
   if (pl.key === 'surprise') {

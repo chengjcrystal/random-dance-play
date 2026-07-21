@@ -22,11 +22,8 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
 - Two per-song marks: tap the star to favorite a song, or the check to mark it Full
   Song Known (you know it start to finish). Filter the catalog by Faves / Full Song
   Known / Girl / Boy groups and sort by group or A to Z.
-- Load a whole playlist in one tap (Add Faves, Add Full Song Known, Add Everything,
+- Load a whole playlist in one tap (Add Faves, Full Song, Add Everything,
   Surprise Six). Adding or removing doesn't jump your scroll: the catalog stays put.
-- A "you might know these" quick-add row sits by your setlist and suggests songs you
-  don't have yet, drawn from groups you've already picked (padded with popular hits).
-  It's a small honest heuristic, not a recommender model.
 - In a session, songs you marked Full Song Known play their full track; everything else
   plays a short guess-clip. No global toggle to remember.
 - Play a session: each song plays with the name hidden, reveals after a guess
