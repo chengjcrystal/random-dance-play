@@ -517,6 +517,8 @@
       <input type="file" id="import-file" accept="application/json,.json" hidden>
     </div>
 
+    <div class="recs" id="cat-recs" hidden></div>
+
     <div class="tracker" id="tracker"></div>
 
     <div id="songlist" class="grid"></div>
@@ -528,7 +530,6 @@
         <p class="note">Tap Add on any song and it drops straight into your setlist with a clip already set. Star the ones you love, check off the ones you know start to finish, or load a whole playlist in one tap.</p>
         <div class="searchrow"><svg class="ico"><use href="#i-spark"/></svg><input id="cat-search" placeholder="search songs or groups (try: twice, magnetic, aespa)"></div>
         <div class="shelf" id="cat-shelf"></div>
-        <div class="recs" id="cat-recs" hidden></div>
         <div class="catbar">
           <div class="tabs" id="cat-tabs"></div>
           <div class="seg sortseg" id="cat-sort" data-value="group">
@@ -1074,13 +1075,9 @@ async function openEditor(id) {
     onStateChange: onEditorState,
     onError: () => { document.querySelector('.editor-hint').textContent = 'This video could not load (removed, private, or region-blocked).'; },
   });
-  startCcBurst();
-  // default to the shortened preview (clip start -> end) rather than the full video
-  if (hasClipRange) {
-    previewing = true;
-    try { player.seekTo(tempStart, true); player.playVideo(); } catch {}
-    startEditorPoll();
-  }
+  killCaptions();
+  // opens cued and paused at the clip start: nothing plays, so no captions ever show.
+  // hit Play Clip to preview the shortened section.
 }
 function onEditorState(e) {
   if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) killCaptions();
@@ -1127,6 +1124,7 @@ document.getElementById('btn-preview').onclick = () => {
   previewing = true;
   player.seekTo(tempStart, true);
   player.playVideo();
+  startCcBurst();
   startEditorPoll();
 };
 document.getElementById('btn-save-clip').onclick = () => {
@@ -1662,12 +1660,11 @@ function catCardEl(c) {
   return card;
 }
 
-/* recommendations: not ML, just an honest heuristic. Surface songs from groups you
-   already added/starred that aren't in your setlist yet, padded out with well-known
-   hits. Only shown on the default (unfiltered, unsearched) view. */
+/* recommendations: not ML, just an honest heuristic. Surface songs NOT in your setlist
+   yet, from groups you already added/starred, padded out with well-known hits. Lives up
+   by the setlist as a quick-add, not inside the catalog. */
 const POPULAR_IDS = ['9uypQGzzhns', '6KIuzXYR16Y', '4hAdcenQWqU', 'wU2siJ2c5TA', 'pKCaXYYwGjw', '8x43gsnkBH8'];
 function recommendedCats() {
-  if (catSearch.trim() || catFilter !== 'all') return [];
   const inLib = new Set(songs.map(s => s.youtubeId));
   const engaged = new Set();
   for (const s of songs) if (s.group) engaged.add(s.group);
