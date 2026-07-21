@@ -472,6 +472,9 @@
   <symbol id="i-replay" viewBox="0 0 100 100"><path fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" d="M78 34 A34 34 0 1 0 84 55"/><path fill="currentColor" d="M64 8 L84 34 L54 38 Z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 100 100"><rect x="20" y="24" width="60" height="11" rx="3" fill="currentColor"/><rect x="40" y="13" width="20" height="10" rx="3" fill="currentColor"/><path fill="currentColor" d="M28 39 h44 l-4 45 a8 8 0 0 1 -8 7 H40 a8 8 0 0 1 -8 -7 z"/></symbol>
   <symbol id="i-check" viewBox="0 0 100 100"><path fill="none" stroke="currentColor" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" d="M20 53 L42 74 L82 28"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 100 100"><path fill="currentColor" d="M43 12 h14 v31 h31 v14 h-31 v31 h-14 v-31 h-31 v-14 h31 z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 100 100"><path fill="currentColor" d="M70 10 L90 30 L78 42 L58 22 Z"/><path fill="currentColor" d="M54 26 L74 46 L30 90 L8 92 L10 70 Z"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"><circle cx="24" cy="26" r="11"/><circle cx="24" cy="74" r="11"/><path d="M34 32 L86 76"/><path d="M34 68 L86 24"/></g></symbol>
 </defs></svg>
 
 <!-- ================= LIBRARY ================= -->
@@ -496,10 +499,10 @@
 
     <h2 class="sectlabel">your setlist</h2>
     <div class="toolbar">
-      <button class="primary" id="btn-play" disabled>Play Session</button>
+      <button class="primary" id="btn-play" disabled><svg class="ico" style="font-size:13px;margin-right:7px"><use href="#i-play"/></svg>Play Session</button>
       <span class="count" id="lib-count"></span>
       <div class="spacer"></div>
-      <button class="small" id="btn-clear" hidden>Clear Library</button>
+      <button class="small" id="btn-clear" hidden><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-trash"/></svg>Clear Library</button>
       <button class="small" id="btn-export"><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-floppy"/></svg>Export</button>
       <button class="small" id="btn-import"><svg class="ico" style="font-size:14px;margin-right:5px"><use href="#i-folder"/></svg>Import</button>
       <input type="file" id="import-file" accept="application/json,.json" hidden>
@@ -533,7 +536,7 @@
         <p class="note">Not in the catalog? Paste any YouTube links here, one per line. Names fill in automatically and each gets a starter clip. Optional: put a name before the link.</p>
         <textarea id="add-bulk" placeholder="https://youtu.be/xxxxxxxxxxx
 NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
-        <div class="go"><button class="primary" id="btn-add">Add to Library</button></div>
+        <div class="go"><button class="primary" id="btn-add"><svg class="ico" style="font-size:12px;margin-right:7px"><use href="#i-plus"/></svg>Add to Library</button></div>
       </div>
     </div>
 
@@ -600,8 +603,8 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
 
     <div class="startgate" id="startgate">
       <h2>ready to dance?</h2>
-      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each song plays hidden, then the name is revealed. Songs you checked as <b>known</b> play the full track; the rest are quick guess-clips.</p>
-      <button class="primary" id="btn-start-session">Start</button>
+      <p>Tap start to begin. This first tap unlocks audio for the whole session. Each song plays hidden, then the name is revealed. Songs you marked <b>full song known</b> play the whole track; the rest are quick guess-clips.</p>
+      <button class="primary" id="btn-start-session"><svg class="ico" style="font-size:14px;margin-right:8px"><use href="#i-play"/></svg>Start</button>
       <button class="link" id="btn-quit-early" style="color:rgba(255,220,232,.8)">back to library</button>
     </div>
 
@@ -609,7 +612,7 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
       <h2>that's a wrap!</h2>
       <p id="finish-recap"></p>
       <div class="finish-list" id="finish-list"></div>
-      <button class="primary" id="btn-play-again">Play Again</button>
+      <button class="primary" id="btn-play-again"><svg class="ico" style="font-size:13px;margin-right:8px"><use href="#i-replay"/></svg>Play Again</button>
       <button class="link" id="btn-finish-back" style="color:rgba(255,220,232,.8)">back to library</button>
     </div>
   </div>
@@ -876,7 +879,7 @@ function songCard(s, i) {
   el.className = 'card';
   let dot, statusText;
   if (errored.has(s.youtubeId)) { dot = 'err'; statusText = 'playback error'; }
-  else if (isFull(s)) { dot = 'ready'; statusText = 'known · plays full track'; }
+  else if (isFull(s)) { dot = 'ready'; statusText = 'full song known · plays whole track'; }
   else if (hasClip(s) && s.auto) { dot = 'auto'; statusText = 'auto ' + fmt(s.startSec) + '–' + fmt(s.endSec); }
   else if (hasClip(s)) { dot = 'ready'; statusText = fmt(s.startSec) + '–' + fmt(s.endSec); }
   else { dot = 'none'; statusText = 'no clip set'; }
@@ -887,8 +890,8 @@ function songCard(s, i) {
       '<div class="name"></div>' +
       '<div class="status"><i class="dot ' + dot + '"></i><span></span></div>' +
       '<div class="acts">' +
-        '<button class="small" data-act="clip">Set Clip</button>' +
-        '<button class="small" data-act="edit">Edit</button>' +
+        '<button class="small" data-act="clip"><svg class="ico" style="font-size:13px;margin-right:5px"><use href="#i-scissors"/></svg>Set Clip</button>' +
+        '<button class="small" data-act="edit"><svg class="ico" style="font-size:12px;margin-right:5px"><use href="#i-pencil"/></svg>Edit</button>' +
         '<button class="small del" data-act="del" title="delete" aria-label="delete"><svg class="ico"><use href="#i-trash"/></svg></button>' +
       '</div>' +
     '</div>';
@@ -1523,7 +1526,7 @@ function isFull(s) { return s && known.has(s.youtubeId); }
 
 const PLAYLISTS = [
   { key: 'fav',      label: 'Add Faves',      ico: 'i-star',  cats: () => CATALOG.filter(c => favs.has(c.youtubeId)) },
-  { key: 'known',    label: 'Add Known',      ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
+  { key: 'known',    label: 'Add Full Song Known', ico: 'i-check', cats: () => CATALOG.filter(c => known.has(c.youtubeId)) },
   { key: 'all',      label: 'Add Everything', ico: 'i-spark', cats: () => CATALOG.slice() },
   { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   cats: null },
 ];
@@ -1534,7 +1537,7 @@ function genderOf(group) { return BOY_GROUPS.has(group) ? 'boy' : 'girl'; }
 const CAT_TABS = [
   { key: 'all',   label: 'All' },
   { key: 'fav',   label: '★ Faves' },
-  { key: 'known', label: '✓ Known' },
+  { key: 'known', label: '✓ Full Song Known' },
   { key: 'girl',  label: 'Girl Groups' },
   { key: 'boy',   label: 'Boy Groups' },
 ];
@@ -1609,7 +1612,7 @@ function renderCatalog() {
   if (list.length === 0) {
     grid.innerHTML = '<div class="noresult">' +
       (catFilter === 'fav' ? 'no faves yet, tap the star on songs you love'
-        : catFilter === 'known' ? 'nothing marked known yet, tap the check on songs you know start to finish'
+        : catFilter === 'known' ? 'nothing marked full song known yet, tap the check on songs you know start to finish'
         : 'no matches, try another search') + '</div>';
     return;
   }
@@ -1622,7 +1625,7 @@ function renderCatalog() {
     card.innerHTML =
       '<div class="cthumb"><img loading="lazy" src="' + thumb(c.youtubeId) + '" alt="">' +
         '<button class="favbtn' + (fav ? ' on' : '') + '" title="favorite" aria-label="favorite"><svg class="ico"><use href="#i-star"/></svg></button>' +
-        '<button class="knownbtn' + (kn ? ' on' : '') + '" title="I know this one start to finish (plays the full track)" aria-label="mark as known"><svg class="ico"><use href="#i-check"/></svg></button></div>' +
+        '<button class="knownbtn' + (kn ? ' on' : '') + '" title="Full Song Known: you know this one start to finish, so it plays the whole track" aria-label="mark full song known"><svg class="ico"><use href="#i-check"/></svg></button></div>' +
       '<div class="meta"><div class="cname"></div><div class="cgrp"></div></div>' +
       '<button class="small addbtn' + (added ? ' added' : '') + '">' + (added ? 'Added' : 'Add') + '</button>';
     card.querySelector('.cname').textContent = c.name.replace(c.group + ' - ', '');
@@ -1642,17 +1645,29 @@ function renderCatalog() {
   }
 }
 
+/* Adding/removing changes the setlist height, which sits above the catalog. Re-render,
+   then scroll by however much the catalog shifted so it stays put under your cursor. */
+function anchoredRender() {
+  const a = document.querySelector('.win.cat');
+  const before = a ? a.getBoundingClientRect().top : null;
+  renderLibrary();
+  if (a && before != null) {
+    const delta = a.getBoundingClientRect().top - before;
+    if (delta) window.scrollBy(0, delta);
+  }
+}
+
 function addFromCatalog(c) {
   if (inLibrary(c.youtubeId)) return;
   songs.push(catToSong(c));
-  saveSongs(); renderLibrary();
+  saveSongs(); anchoredRender();
   toast('Added ' + c.name.replace(c.group + ' - ', ''));
 }
 function removeFromCatalog(c) {
   const before = songs.length;
   songs = songs.filter(s => s.youtubeId !== c.youtubeId);
   if (songs.length === before) return;
-  saveSongs(); renderLibrary();
+  saveSongs(); anchoredRender();
   toast('Removed ' + c.name.replace(c.group + ' - ', ''));
 }
 function togglePlaylist(pl) {
@@ -1661,14 +1676,14 @@ function togglePlaylist(pl) {
       const drop = new Set(surpriseIds);
       songs = songs.filter(s => !drop.has(s.youtubeId));
       surpriseIds = [];
-      saveSongs(); renderLibrary();
+      saveSongs(); anchoredRender();
       toast('Removed the surprise six.');
     } else {
       const picks = shuffle(CATALOG).slice(0, 6);
       surpriseIds = picks.map(c => c.youtubeId);
       let n = 0;
       for (const c of picks) if (!inLibrary(c.youtubeId)) { songs.push(catToSong(c)); n++; }
-      saveSongs(); renderLibrary();
+      saveSongs(); anchoredRender();
       toast('Added ' + n + ' surprise song' + (n === 1 ? '' : 's') + '.');
     }
     return;
@@ -1683,13 +1698,13 @@ function togglePlaylist(pl) {
   if (cats.every(c => inLibrary(c.youtubeId))) {
     const drop = new Set(cats.map(c => c.youtubeId));
     songs = songs.filter(s => !drop.has(s.youtubeId));
-    saveSongs(); renderLibrary();
-    toast('Removed ' + cats.length + ' from ' + pl.label + '.');
+    saveSongs(); anchoredRender();
+    toast('Removed ' + cats.length + ' ' + pl.label.replace(/^Add /, '') + '.');
   } else {
     let n = 0;
     for (const c of cats) if (!inLibrary(c.youtubeId)) { songs.push(catToSong(c)); n++; }
-    saveSongs(); renderLibrary();
-    toast('Added ' + n + ' from ' + pl.label + '.');
+    saveSongs(); anchoredRender();
+    toast('Added ' + n + ' ' + pl.label.replace(/^Add /, '') + '.');
   }
 }
 

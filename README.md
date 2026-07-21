@@ -19,12 +19,13 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
   so you can play right away with nothing to type. Added songs float to the top of
   the catalog.
 - Or paste any YouTube link for songs that aren't in the catalog.
-- Two per-song marks: tap the star to favorite a song, or the check to mark one you
-  know start to finish. Filter the catalog by Faves / Known / Girl / Boy groups and
-  sort by group or A to Z.
-- Load a whole playlist in one tap (Add Faves, Add Known, Add Everything, Surprise Six).
-- In a session, songs you marked known play their full track; everything else plays a
-  short guess-clip. No global toggle to remember.
+- Two per-song marks: tap the star to favorite a song, or the check to mark it Full
+  Song Known (you know it start to finish). Filter the catalog by Faves / Full Song
+  Known / Girl / Boy groups and sort by group or A to Z.
+- Load a whole playlist in one tap (Add Faves, Add Full Song Known, Add Everything,
+  Surprise Six). Adding or removing doesn't jump your scroll: the catalog stays put.
+- In a session, songs you marked Full Song Known play their full track; everything else
+  plays a short guess-clip. No global toggle to remember.
 - Play a session: each song plays with the name hidden, reveals after a guess
   window, counts down, then auto-advances to the next random one.
 - Everything saves in your browser. Export and import JSON to back up or move it
