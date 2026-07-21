@@ -995,14 +995,26 @@ async function openEditor(id) {
   document.getElementById('edit-start').value = fmt(tempStart);
   document.getElementById('edit-end').value = fmt(tempEnd);
   showScreen('editor');
+  const hasClipRange = tempEnd > tempStart;
   await makePlayer('editor-player-wrap', {
     videoId: s.youtubeId,
-    vars: { controls: 1, rel: 0, playsinline: 1, modestbranding: 1 },
+    vars: { controls: 1, rel: 0, playsinline: 1, modestbranding: 1, cc_load_policy: 0,
+      start: hasClipRange ? Math.max(0, Math.floor(tempStart)) : 0 },
     onStateChange: onEditorState,
     onError: () => { document.querySelector('.editor-hint').textContent = 'This video could not load (removed, private, or region-blocked).'; },
   });
+  startCcBurst();
+  // default to the shortened preview (clip start -> end) rather than the full video
+  if (hasClipRange) {
+    previewing = true;
+    try { player.seekTo(tempStart, true); player.playVideo(); } catch {}
+    startEditorPoll();
+  }
 }
-function onEditorState(e) { if (e.data === YT.PlayerState.PLAYING && previewing) startEditorPoll(); }
+function onEditorState(e) {
+  if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) killCaptions();
+  if (e.data === YT.PlayerState.PLAYING && previewing) startEditorPoll();
+}
 function startEditorPoll() {
   stopEditorPoll();
   editorPoll = setInterval(() => {
