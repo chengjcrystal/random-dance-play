@@ -149,9 +149,12 @@
   .card .acts button { flex: 1; }
   .card .acts .del { flex: 0 0 auto; padding: 6px 9px; }
   .card .acts .del .ico { font-size: 15px; color: var(--rose-deep); vertical-align: -.16em; }
-  .card .acts .lenbtn .ico { vertical-align: -.14em; }
-  .card .acts .lenbtn.on { background: var(--red); border-color: var(--red); color: #fff3f5; }
-  .card .acts .lenbtn.on:hover:not(:disabled) { background: var(--red-dark); border-color: var(--red-dark); }
+  .card .lenrow { display: flex; align-items: center; gap: 8px; margin-top: -2px; }
+  .card .lenrow .lenlabel { font-size: 12px; color: var(--muted); }
+  .card .lenseg { display: inline-flex; border: 1.4px solid var(--rose); }
+  .card .lenseg button { border: 0; background: var(--paper); padding: 3px 12px; font-size: 11.5px; color: var(--muted); }
+  .card .lenseg button + button { border-left: 1.4px solid var(--rose); }
+  .card .lenseg button.on { background: var(--red); color: #fff3f5; }
   .grid.is-empty { border: 0; }
   .empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: 40px 14px 10px; font-family: Fraunces, serif; font-style: italic; font-size: 17px; }
 
@@ -889,9 +892,14 @@ function songCard(s, i) {
   else if (hasClip(s) && s.auto) { dot = 'auto'; statusText = 'auto ' + fmt(s.startSec) + '–' + fmt(s.endSec); }
   else if (hasClip(s)) { dot = 'ready'; statusText = fmt(s.startSec) + '–' + fmt(s.endSec); }
   else { dot = 'none'; statusText = 'no clip set'; }
-  const lenToggle = kn
-    ? '<button class="small lenbtn' + (full ? ' on' : '') + '" data-act="fulllen" title="you know this one fully: play the whole track or just the clip">' +
-        '<svg class="ico" style="font-size:12px;margin-right:5px"><use href="#i-play"/></svg>' + (full ? 'Full song' : 'Chorus') + '</button>'
+  const lenRow = kn
+    ? '<div class="lenrow" title="you know this one fully: play the whole track or just the clip">' +
+        '<span class="lenlabel">plays</span>' +
+        '<span class="lenseg">' +
+          '<button data-len="clip"' + (!full ? ' class="on"' : '') + '>Chorus</button>' +
+          '<button data-len="full"' + (full ? ' class="on"' : '') + '>Full</button>' +
+        '</span>' +
+      '</div>'
     : '';
   el.innerHTML =
     '<div class="thumbwrap"><img loading="lazy" src="' + thumb(s.youtubeId) + '" alt="">' +
@@ -899,8 +907,8 @@ function songCard(s, i) {
     '<div class="body">' +
       '<div class="name"></div>' +
       '<div class="status"><i class="dot ' + dot + '"></i><span></span></div>' +
+      lenRow +
       '<div class="acts">' +
-        lenToggle +
         '<button class="small" data-act="clip"><svg class="ico" style="font-size:13px;margin-right:5px"><use href="#i-scissors"/></svg>Set Clip</button>' +
         '<button class="small" data-act="edit"><svg class="ico" style="font-size:12px;margin-right:5px"><use href="#i-pencil"/></svg>Edit</button>' +
         '<button class="small del" data-act="del" title="delete" aria-label="delete"><svg class="ico"><use href="#i-trash"/></svg></button>' +
@@ -908,8 +916,11 @@ function songCard(s, i) {
     '</div>';
   el.querySelector('.name').textContent = s.name || '(fetching name...)';
   el.querySelector('.status span').textContent = statusText;
-  const lenEl = el.querySelector('[data-act="fulllen"]');
-  if (lenEl) lenEl.onclick = () => { togglePlayFull(s.youtubeId); renderLibrary(); };
+  const seg = el.querySelector('.lenseg');
+  if (seg) seg.querySelectorAll('button').forEach(btn => btn.onclick = () => {
+    const wantFull = btn.dataset.len === 'full';
+    if (wantFull !== playFull.has(s.youtubeId)) { togglePlayFull(s.youtubeId); renderLibrary(); }
+  });
   el.querySelector('[data-act="clip"]').onclick = () => openEditor(s.id);
   el.querySelector('[data-act="edit"]').onclick = () => openEditModal(s.id);
   el.querySelector('[data-act="del"]').onclick = () => {
