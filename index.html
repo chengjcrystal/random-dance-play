@@ -130,7 +130,6 @@
   .card .thumbwrap { position: relative; aspect-ratio: 16/9; background: var(--blush); border-bottom: 1.4px solid var(--rose); overflow: hidden; }
   .card .thumbwrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .card .idx { position: absolute; top: 0; left: 0; background: var(--red); color: #fff3f5; font-family: Fraunces, serif; font-size: 12px; padding: 2px 8px; }
-  .card .bow { position: absolute; top: 5px; right: 6px; color: var(--rose); font-size: 22px; filter: drop-shadow(0 1px 1px rgba(90,36,55,.25)); }
   .card .body { padding: 13px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
   .card .name { font-family: Fraunces, serif; font-weight: 600; font-size: 16px; line-height: 1.18;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -206,15 +205,15 @@
     background: var(--cream); border-top: 1.4px solid var(--rose); padding-bottom: max(12px, env(safe-area-inset-bottom)); }
   .playbar .status { display: flex; flex-direction: column; line-height: 1.2; margin-right: auto; }
   .playbar .status .pos { font-family: Fraunces, serif; font-weight: 600; font-size: 18px; }
-  .playbar .status .rnd { font-family: Fraunces, serif; font-style: italic; font-size: 12px; color: var(--rose-deep); }
   .playbar .status .clock { font-size: 11px; color: var(--muted); font-weight: 600; }
   .playbar button { padding: 11px 14px; }
+  .playbar .ctrl { padding: 0; width: 46px; height: 40px; display: grid; place-items: center; }
+  .playbar .ctrl .ico { font-size: 17px; }
 
   .startgate { position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
     flex-direction: column; gap: 18px; text-align: center; padding: 26px;
     background: radial-gradient(circle at 50% 34%, #4a1626, #220d16 66%); }
   .startgate.hide { display: none; }
-  .startgate .gloss { width: 84px; filter: drop-shadow(0 8px 14px rgba(0,0,0,.4)); }
   .startgate h2 { color: #fff; font-size: 34px; font-style: italic; font-weight: 500; }
   .startgate p { color: rgba(255,224,235,.75); max-width: 400px; font-size: 14px; line-height: 1.6; }
   .startgate button.primary { font-size: 17px; padding: 14px 42px; }
@@ -421,28 +420,11 @@
     <circle cx="25" cy="67" r="5" fill="#ffffff" opacity=".55"/>
     <circle cx="62" cy="71" r="4.5" fill="#ffffff" opacity=".55"/>
   </symbol>
+  <symbol id="i-pause" viewBox="0 0 100 100"><rect x="28" y="20" width="15" height="60" rx="2" fill="currentColor"/><rect x="57" y="20" width="15" height="60" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-play" viewBox="0 0 100 100"><path fill="currentColor" d="M28 18 L82 50 L28 82 Z"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 100 100"><path fill="currentColor" d="M24 20 L60 50 L24 80 Z"/><rect x="64" y="20" width="13" height="60" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-replay" viewBox="0 0 100 100"><path fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" d="M78 34 A34 34 0 1 0 84 55"/><path fill="currentColor" d="M64 8 L84 34 L54 38 Z"/></symbol>
 </defs></svg>
-
-<!-- glossy chrome heart (hero mascot) -->
-<template id="gloss-heart">
-  <svg class="gloss" viewBox="0 0 100 90">
-    <defs>
-      <radialGradient id="gh" cx="36%" cy="28%" r="74%">
-        <stop offset="0%" stop-color="#ffffff"/>
-        <stop offset="15%" stop-color="#ffe7f0"/>
-        <stop offset="44%" stop-color="#ff9fc3"/>
-        <stop offset="74%" stop-color="#ec6f9c"/>
-        <stop offset="100%" stop-color="#cc4f7c"/>
-      </radialGradient>
-      <radialGradient id="ghl" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
-        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-      </radialGradient>
-    </defs>
-    <path fill="url(#gh)" d="M50 84 C18 60 4 44 4 27 C4 14 14 6 26 6 C36 6 44 12 50 21 C56 12 64 6 74 6 C86 6 96 14 96 27 C96 44 82 60 50 84 Z"/>
-    <ellipse cx="33" cy="26" rx="15" ry="9" fill="url(#ghl)" transform="rotate(-22 33 26)"/>
-  </svg>
-</template>
 
 <button class="small settings-fab" id="btn-settings"><svg class="ico"><use href="#i-star"/></svg>settings</button>
 
@@ -562,7 +544,6 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
     <div class="errflash" id="errflash">Clip unavailable, skipping</div>
 
     <div class="startgate" id="startgate">
-      <span id="gloss-slot-2"></span>
       <h2>ready to dance?</h2>
       <p>Tap start to begin. This first tap unlocks audio for the whole session. Each clip plays hidden, then the name is revealed.</p>
       <button class="primary" id="btn-start-session">Start</button>
@@ -583,10 +564,9 @@ NewJeans - Super Shy   https://www.youtube.com/watch?v=xxxxxxxxxxx"></textarea>
       <span class="pos" id="play-pos">0 / 0</span>
       <span class="clock" id="play-clock"></span>
     </div>
-    <button class="small" id="btn-replay">Replay</button>
-    <button class="small" id="btn-pause">Pause</button>
-    <button class="small primary" id="btn-skip">Skip</button>
-    <button class="small" id="btn-quit">End</button>
+    <button class="small ctrl" id="btn-replay" title="replay" aria-label="replay"><svg class="ico"><use href="#i-replay"/></svg></button>
+    <button class="small ctrl" id="btn-pause" title="pause" aria-label="pause"><svg class="ico"><use href="#i-pause"/></svg></button>
+    <button class="small primary ctrl" id="btn-skip" title="skip" aria-label="skip"><svg class="ico"><use href="#i-skip"/></svg></button>
   </div>
 </div>
 
@@ -763,13 +743,6 @@ function showScreen(name) {
   for (const el of document.querySelectorAll('.screen')) el.classList.remove('active');
   document.getElementById(name + '-screen').classList.add('active');
 }
-
-/* ---------- glossy heart into hero + start gate ---------- */
-(function placeGloss() {
-  const tpl = document.getElementById('gloss-heart');
-  const s2 = document.getElementById('gloss-slot-2');
-  if (s2) s2.appendChild(tpl.content.cloneNode(true));
-})();
 
 /* ---------- segmented control helpers ---------- */
 function initSeg(id) {
@@ -1106,6 +1079,12 @@ const el = {
   pauseBtn: document.getElementById('btn-pause'),
   stage: document.getElementById('stage'),
 };
+function setPauseIcon(paused) {
+  const u = el.pauseBtn.querySelector('use');
+  if (u) u.setAttribute('href', paused ? '#i-play' : '#i-pause');
+  el.pauseBtn.title = paused ? 'resume' : 'pause';
+  el.pauseBtn.setAttribute('aria-label', paused ? 'resume' : 'pause');
+}
 
 function currentSong() { return songs.find(s => s.id === queue[queueIndex]); }
 
@@ -1128,7 +1107,7 @@ document.getElementById('btn-play').onclick = () => {
   el.reveal.classList.remove('show');
   el.guessOverlay.style.display = 'none';
   el.nextOverlay.classList.remove('show');
-  el.pauseBtn.textContent = 'Pause';
+  setPauseIcon(false);
   showScreen('play');
 };
 
@@ -1155,7 +1134,7 @@ function loadCurrentClip() {
   computeBounds(s);
   clipEnding = false; clipStarted = false; clipLoadAt = performance.now(); phase = 'guessing'; isPaused = false;
   el.stage.classList.add('buffering');
-  el.pauseBtn.textContent = 'Pause';
+  setPauseIcon(false);
   el.reveal.classList.remove('show');
   el.revealName.textContent = s.name || '(untitled)';
   el.nextOverlay.classList.remove('show');
@@ -1243,6 +1222,8 @@ function clipEnded() {
   el.guessOverlay.style.display = 'none';
   el.reveal.classList.remove('show');
   el.clock.textContent = '';
+  // last song: no "next in" countdown, wrap straight to the finish screen
+  if (queueIndex >= queue.length - 1) { advance(); return; }
   const s = currentSong();
   el.nextUp.textContent = (settings.revealMode !== 'hidden' && s) ? 'previous: ' + (s.name || '(untitled)') : '';
   if (settings.countdownSec <= 0) { advance(); return; }
@@ -1306,21 +1287,20 @@ document.getElementById('btn-replay').onclick = () => {
   el.nextOverlay.classList.remove('show');
   el.reveal.classList.remove('show');
   el.guessOverlay.style.display = 'flex';
-  if (isPaused) { isPaused = false; el.pauseBtn.textContent = 'Pause'; }
+  if (isPaused) { isPaused = false; setPauseIcon(false); }
   player.seekTo(effStart, true);
   player.playVideo();
 };
 document.getElementById('btn-pause').onclick = () => {
   if (phase === 'idle' || !player) return;
   if (isPaused) {
-    isPaused = false; el.pauseBtn.textContent = 'Pause';
+    isPaused = false; setPauseIcon(false);
     if (phase !== 'countdown') player.playVideo();
   } else {
-    isPaused = true; el.pauseBtn.textContent = 'Resume';
+    isPaused = true; setPauseIcon(true);
     if (phase !== 'countdown') player.pauseVideo();
   }
 };
-document.getElementById('btn-quit').onclick = endSession;
 document.getElementById('btn-quit-early').onclick = endSession;
 document.getElementById('btn-finish-back').onclick = endSession;
 document.getElementById('btn-exit').onclick = endSession;
@@ -1450,7 +1430,7 @@ const CATALOG = [
 ];
 
 const PLAYLISTS = [
-  { key: 'bias',     label: 'Bias Picks',     ico: 'i-spark', pick: c => ['TWICE', 'ILLIT', 'LE SSERAFIM'].includes(c.group) },
+  { key: 'bias',     label: 'My Fav Groups',  ico: 'i-spark', pick: c => ['TWICE', 'ILLIT', 'LE SSERAFIM'].includes(c.group) },
   { key: 'all',      label: 'Add Everything', ico: 'i-star',  pick: () => true },
   { key: 'surprise', label: 'Surprise Six',   ico: 'i-fly',   pick: null },
 ];

@@ -17,7 +17,7 @@ is a weekend-project kind of thing, built because it sounded fun, not a startup.
   aespa, IVE, and more) and one-tap add. Each song comes with a clip already set,
   so you can play right away with nothing to type.
 - Or paste any YouTube link for songs that aren't in the catalog.
-- Load a whole playlist in one tap (Bias Picks, Add Everything, Surprise Six).
+- Load a whole playlist in one tap (My Fav Groups, Add Everything, Surprise Six).
 - Play a session: each clip plays with the name hidden, reveals after a guess
   window, counts down, then auto-advances to the next random clip.
 - Everything saves in your browser. Export and import JSON to back up or move it
