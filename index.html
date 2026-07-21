@@ -1136,26 +1136,26 @@ function loadCurrentClip() {
   clipEnding = false; clipStarted = false; clipLoadAt = performance.now(); phase = 'guessing'; isPaused = false;
   el.pauseBtn.textContent = 'Pause';
   el.reveal.classList.remove('show');
-  el.revealName.innerHTML = '';
-  el.revealName.append(s.name || '(untitled)');
-  const h = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  h.setAttribute('class', 'ico'); h.innerHTML = '<use href="#i-star"/>';
-  el.revealName.appendChild(h);
+  el.revealName.textContent = s.name || '(untitled)';
   el.nextOverlay.classList.remove('show');
   el.guessOverlay.style.display = 'flex';
   el.guessPill.firstChild.textContent = settings.revealMode === 'hidden' ? 'dance!' : 'guess?';
   updateStatus();
   player.loadVideoById({ videoId: s.youtubeId, startSeconds: effStart, endSeconds: effEnd });
+  killCaptions(); setTimeout(killCaptions, 300); setTimeout(killCaptions, 900);
 }
 function updateStatus() {
   el.pos.textContent = (queueIndex + 1) + ' / ' + queue.length;
   el.round.textContent = 'round ' + round;
 }
 
+function killCaptions() {
+  if (!player) return;
+  try { player.unloadModule('captions'); } catch {}
+  try { player.unloadModule('cc'); } catch {}
+}
 function onPlayState(e) {
-  if (e.data === YT.PlayerState.PLAYING) {
-    try { player.unloadModule('captions'); player.unloadModule('cc'); } catch {}
-  }
+  if (e.data === YT.PlayerState.BUFFERING || e.data === YT.PlayerState.PLAYING) killCaptions();
   if (e.data === YT.PlayerState.ENDED && clipStarted && (phase === 'guessing' || phase === 'playing')) clipEnded();
 }
 function onPlayError() {
