@@ -81,7 +81,7 @@
   .seg button.active:hover { background: var(--red); }
 
   a { color: var(--red); }
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 30px 22px 90px; }
+  .wrap { position: relative; max-width: 1060px; margin: 0 auto; padding: 30px 22px 90px; }
 
   /* ---- header ---- */
   .hero { position: relative; text-align: center; padding: 30px 10px 10px; margin-bottom: 8px; }
@@ -109,7 +109,7 @@
   .hero .cherry.r { right: 2%; top: 12px; transform: rotate(13deg); }
   @media (max-width: 760px) { .hero .cherry { display: none; } }
 
-  .settings-fab { position: fixed; top: 16px; right: 16px; z-index: 20; display: inline-flex; align-items: center; gap: 6px; }
+  .settings-fab { position: absolute; top: 10px; right: 22px; z-index: 5; display: inline-flex; align-items: center; gap: 6px; }
   .settings-fab .ico { font-size: 15px; color: var(--rose-deep); }
 
   /* ---- add block ---- */
@@ -426,12 +426,11 @@
   <symbol id="i-replay" viewBox="0 0 100 100"><path fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" d="M78 34 A34 34 0 1 0 84 55"/><path fill="currentColor" d="M64 8 L84 34 L54 38 Z"/></symbol>
 </defs></svg>
 
-<button class="small settings-fab" id="btn-settings"><svg class="ico"><use href="#i-star"/></svg>settings</button>
-
 <!-- ================= LIBRARY ================= -->
 <div id="library-screen" class="screen active">
   <div class="marquee"><div class="track" id="marquee-track"></div></div>
   <div class="wrap">
+    <button class="small settings-fab" id="btn-settings"><svg class="ico"><use href="#i-star"/></svg>settings</button>
     <div class="hero">
       <div class="pcards" id="pcards"></div>
       <svg class="ico bigstar"><use href="#i-star"/></svg>
